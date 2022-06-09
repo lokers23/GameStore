@@ -1,0 +1,17 @@
+F:\AllTestProjects\GameStore.Service\bin\Debug\net6.0\GameStore.Service.deps.json
+F:\AllTestProjects\GameStore.Service\bin\Debug\net6.0\GameStore.Service.dll
+F:\AllTestProjects\GameStore.Service\bin\Debug\net6.0\GameStore.Service.pdb
+F:\AllTestProjects\GameStore.Service\bin\Debug\net6.0\GameStore.DAL.dll
+F:\AllTestProjects\GameStore.Service\bin\Debug\net6.0\GameStore.Domain.dll
+F:\AllTestProjects\GameStore.Service\bin\Debug\net6.0\GameStore.DAL.pdb
+F:\AllTestProjects\GameStore.Service\bin\Debug\net6.0\GameStore.Domain.pdb
+F:\AllTestProjects\GameStore.Service\obj\Debug\net6.0\GameStore.Service.csproj.AssemblyReference.cache
+F:\AllTestProjects\GameStore.Service\obj\Debug\net6.0\GameStore.Service.GeneratedMSBuildEditorConfig.editorconfig
+F:\AllTestProjects\GameStore.Service\obj\Debug\net6.0\GameStore.Service.AssemblyInfoInputs.cache
+F:\AllTestProjects\GameStore.Service\obj\Debug\net6.0\GameStore.Service.AssemblyInfo.cs
+F:\AllTestProjects\GameStore.Service\obj\Debug\net6.0\GameStore.Service.csproj.CoreCompileInputs.cache
+F:\AllTestProjects\GameStore.Service\obj\Debug\net6.0\GameStore.Service.csproj.CopyComplete
+F:\AllTestProjects\GameStore.Service\obj\Debug\net6.0\GameStore.Service.dll
+F:\AllTestProjects\GameStore.Service\obj\Debug\net6.0\refint\GameStore.Service.dll
+F:\AllTestProjects\GameStore.Service\obj\Debug\net6.0\GameStore.Service.pdb
+F:\AllTestProjects\GameStore.Service\obj\Debug\net6.0\ref\GameStore.Service.dll

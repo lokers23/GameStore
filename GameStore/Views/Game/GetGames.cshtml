@@ -1,0 +1,15 @@
+﻿@using GameStore.Domain.Entity
+@model IEnumerable<Game>
+
+@{
+    ViewBag.Title = "";
+    Layout = "_Layout";
+}
+
+
+@foreach(var game in Model){
+    <p>@game.Name</p>
+    <p>@game.Discription</p>
+    <p>@game.Price</p>
+    <p>@game.Created</p>
+}
