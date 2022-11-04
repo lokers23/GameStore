@@ -11,16 +11,6 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<GamestoredbContext>();
-// builder.Services.AddDbContext<GamestoredbContext>(options =>
-// {
-//     const string server = "localhost";
-//     const string user = "root";
-//     const string password = "123123123";
-//     const string database = "gamestoredb";
-//     const string connectionString = $"server={server};user={user};password={password};database={database}";
-//     
-//     options.UseMySQL(connectionString);
-// });
 
 var app = builder.Build();
 
