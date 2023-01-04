@@ -3,33 +3,41 @@ using System;
 using GameStore.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+
+#nullable disable
 
 namespace GameStore.DAL.Migrations
 {
     [DbContext(typeof(GamestoredbContext))]
-    [Migration("20221104115416_Initial")]
-    partial class Initial
+    [Migration("20221220153445_roles")]
+    partial class roles
     {
+        /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("Relational:MaxIdentifierLength", 64)
-                .HasAnnotation("ProductVersion", "5.0.17");
+                .HasAnnotation("ProductVersion", "7.0.0")
+                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("GameStore.Domain.Models.Activation", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int(11)")
+                        .HasColumnType("int")
                         .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("varchar(50)")
+                        .HasColumnType("nvarchar(50)")
                         .HasColumnName("name");
 
                     b.HasKey("Id");
@@ -37,58 +45,64 @@ namespace GameStore.DAL.Migrations
                     b.HasIndex(new[] { "Name" }, "name")
                         .IsUnique();
 
-                    b.ToTable("activation");
+                    b.ToTable("activation", (string)null);
                 });
 
             modelBuilder.Entity("GameStore.Domain.Models.Developer", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int(11)")
+                        .HasColumnType("int")
                         .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("varchar(100)")
+                        .HasColumnType("nvarchar(100)")
                         .HasColumnName("name");
 
                     b.HasKey("Id");
 
                     b.HasIndex(new[] { "Name" }, "name")
-                        .IsUnique()
-                        .HasDatabaseName("name1");
+                        .IsUnique();
 
-                    b.ToTable("developer");
+                    b.ToTable("developer", (string)null);
                 });
 
             modelBuilder.Entity("GameStore.Domain.Models.Game", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int(11)")
+                        .HasColumnType("int")
                         .HasColumnName("id");
 
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<string>("AvatarPath")
+                        .ValueGeneratedOnAdd()
                         .HasMaxLength(1000)
-                        .HasColumnType("varchar(1000)")
+                        .HasColumnType("nvarchar(1000)")
                         .HasColumnName("avatar_path")
                         .HasDefaultValueSql("NULL");
 
                     b.Property<string>("Description")
-                        .HasColumnType("text")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
                         .HasColumnName("description")
                         .HasDefaultValueSql("NULL");
 
                     b.Property<int?>("DeveloperId")
-                        .HasColumnType("int(11)")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
                         .HasColumnName("developer_id")
                         .HasDefaultValueSql("NULL");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("varchar(50)")
+                        .HasColumnType("nvarchar(50)")
                         .HasColumnName("name");
 
                     b.Property<decimal>("Price")
@@ -96,7 +110,8 @@ namespace GameStore.DAL.Migrations
                         .HasColumnName("price");
 
                     b.Property<int?>("PublisherId")
-                        .HasColumnType("int(11)")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
                         .HasColumnName("publisher_id")
                         .HasDefaultValueSql("NULL");
 
@@ -105,8 +120,9 @@ namespace GameStore.DAL.Migrations
                         .HasColumnName("release_on");
 
                     b.Property<string>("VideoUrl")
+                        .ValueGeneratedOnAdd()
                         .HasMaxLength(1000)
-                        .HasColumnType("varchar(1000)")
+                        .HasColumnType("nvarchar(1000)")
                         .HasColumnName("video_url")
                         .HasDefaultValueSql("NULL");
 
@@ -115,97 +131,101 @@ namespace GameStore.DAL.Migrations
                     b.HasIndex(new[] { "DeveloperId" }, "developer_id");
 
                     b.HasIndex(new[] { "Name" }, "name")
-                        .IsUnique()
-                        .HasDatabaseName("name2");
+                        .IsUnique();
 
                     b.HasIndex(new[] { "PublisherId" }, "publisher_id");
 
-                    b.ToTable("game");
+                    b.ToTable("game", (string)null);
                 });
 
             modelBuilder.Entity("GameStore.Domain.Models.GameGenre", b =>
                 {
                     b.Property<int>("GameId")
-                        .HasColumnType("int(11)")
+                        .HasColumnType("int")
                         .HasColumnName("game_id");
 
                     b.Property<int>("GenreId")
-                        .HasColumnType("int(11)")
+                        .HasColumnType("int")
                         .HasColumnName("genre_id");
 
                     b.HasKey("GameId", "GenreId")
-                        .HasName("PRIMARY");
+                        .HasName("Primary_Game_Genre");
 
                     b.HasIndex("GenreId");
 
-                    b.ToTable("game_genre");
+                    b.ToTable("game_genre", (string)null);
                 });
 
             modelBuilder.Entity("GameStore.Domain.Models.GameOrder", b =>
                 {
                     b.Property<int>("OrderId")
-                        .HasColumnType("int(11)")
+                        .HasColumnType("int")
                         .HasColumnName("order_id");
 
                     b.Property<int>("GameId")
-                        .HasColumnType("int(11)")
+                        .HasColumnType("int")
                         .HasColumnName("game_id");
 
                     b.HasKey("OrderId", "GameId")
-                        .HasName("PRIMARY");
+                        .HasName("Primary_Game_Order");
 
                     b.HasIndex("GameId");
 
-                    b.ToTable("game_order");
+                    b.ToTable("game_order", (string)null);
                 });
 
             modelBuilder.Entity("GameStore.Domain.Models.Genre", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int(11)")
+                        .HasColumnType("int")
                         .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("varchar(50)")
+                        .HasColumnType("nvarchar(50)")
                         .HasColumnName("name");
 
                     b.HasKey("Id");
 
                     b.HasIndex(new[] { "Name" }, "name")
-                        .IsUnique()
-                        .HasDatabaseName("name3");
+                        .IsUnique();
 
-                    b.ToTable("genre");
+                    b.ToTable("genre", (string)null);
                 });
 
             modelBuilder.Entity("GameStore.Domain.Models.Key", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int(11)")
+                        .HasColumnType("int")
                         .HasColumnName("id");
 
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<int?>("ActivationId")
-                        .HasColumnType("int(11)")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
                         .HasColumnName("activation_id")
                         .HasDefaultValueSql("NULL");
 
                     b.Property<int?>("GameId")
-                        .HasColumnType("int(11)")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
                         .HasColumnName("game_id")
                         .HasDefaultValueSql("NULL");
 
                     b.Property<bool>("IsUsed")
-                        .HasColumnType("tinyint(1)")
+                        .HasColumnType("bit")
                         .HasColumnName("is_used");
 
                     b.Property<string>("Value")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("varchar(100)")
+                        .HasColumnType("nvarchar(100)")
                         .HasColumnName("value");
 
                     b.HasKey("Id");
@@ -217,71 +237,74 @@ namespace GameStore.DAL.Migrations
                     b.HasIndex(new[] { "Value" }, "value")
                         .IsUnique();
 
-                    b.ToTable("key");
+                    b.ToTable("key", (string)null);
                 });
 
             modelBuilder.Entity("GameStore.Domain.Models.MinimumSpecification", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int(11)")
+                        .HasColumnType("int")
                         .HasColumnName("id");
 
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<int>("GameId")
-                        .HasColumnType("int(11)")
+                        .HasColumnType("int")
                         .HasColumnName("game_id");
 
                     b.Property<string>("Graphics")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("varchar(100)")
+                        .HasColumnType("nvarchar(100)")
                         .HasColumnName("graphics");
 
                     b.Property<string>("Memory")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("varchar(50)")
+                        .HasColumnType("nvarchar(50)")
                         .HasColumnName("memory");
 
                     b.Property<string>("Os")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("varchar(100)")
+                        .HasColumnType("nvarchar(100)")
                         .HasColumnName("os");
 
                     b.Property<int>("PlatformId")
-                        .HasColumnType("int(11)")
+                        .HasColumnType("int")
                         .HasColumnName("platform_id");
 
                     b.Property<string>("Processor")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("varchar(100)")
+                        .HasColumnType("nvarchar(100)")
                         .HasColumnName("processor");
 
                     b.Property<string>("Storage")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("varchar(50)")
+                        .HasColumnType("nvarchar(50)")
                         .HasColumnName("storage");
 
                     b.HasKey("Id");
 
-                    b.HasIndex(new[] { "GameId" }, "game_id")
-                        .HasDatabaseName("game_id1");
+                    b.HasIndex(new[] { "GameId" }, "game_id");
 
                     b.HasIndex(new[] { "PlatformId", "GameId" }, "platform_id_game_id")
                         .IsUnique();
 
-                    b.ToTable("minimum_specification");
+                    b.ToTable("minimum_specification", (string)null);
                 });
 
             modelBuilder.Entity("GameStore.Domain.Models.Order", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int(11)")
+                        .HasColumnType("int")
                         .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(20,2)")
@@ -292,7 +315,8 @@ namespace GameStore.DAL.Migrations
                         .HasColumnName("pay_on");
 
                     b.Property<int?>("UserId")
-                        .HasColumnType("int(11)")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
                         .HasColumnName("user_id")
                         .HasDefaultValueSql("NULL");
 
@@ -300,59 +324,85 @@ namespace GameStore.DAL.Migrations
 
                     b.HasIndex(new[] { "UserId" }, "user_id");
 
-                    b.ToTable("order");
+                    b.ToTable("order", (string)null);
                 });
 
             modelBuilder.Entity("GameStore.Domain.Models.Platform", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int(11)")
+                        .HasColumnType("int")
                         .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("varchar(50)")
+                        .HasColumnType("nvarchar(50)")
                         .HasColumnName("name");
 
                     b.HasKey("Id");
 
                     b.HasIndex(new[] { "Name" }, "name")
-                        .IsUnique()
-                        .HasDatabaseName("name4");
+                        .IsUnique();
 
-                    b.ToTable("platform");
+                    b.ToTable("platform", (string)null);
                 });
 
             modelBuilder.Entity("GameStore.Domain.Models.Publisher", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int(11)")
+                        .HasColumnType("int")
                         .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("varchar(100)")
+                        .HasColumnType("nvarchar(100)")
                         .HasColumnName("name");
 
                     b.HasKey("Id");
 
                     b.HasIndex(new[] { "Name" }, "name")
-                        .IsUnique()
-                        .HasDatabaseName("name5");
+                        .IsUnique();
 
-                    b.ToTable("publisher");
+                    b.ToTable("publisher", (string)null);
+                });
+
+            modelBuilder.Entity("GameStore.Domain.Models.Role", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AccessRole")
+                        .HasMaxLength(100)
+                        .HasColumnType("int")
+                        .HasColumnName("access_role");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex(new[] { "AccessRole" }, "access_role")
+                        .IsUnique();
+
+                    b.ToTable("role", (string)null);
                 });
 
             modelBuilder.Entity("GameStore.Domain.Models.User", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int(11)")
+                        .HasColumnType("int")
                         .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("Balance")
                         .HasColumnType("decimal(20,2)")
@@ -361,24 +411,32 @@ namespace GameStore.DAL.Migrations
                     b.Property<string>("Login")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("varchar(50)")
+                        .HasColumnType("nvarchar(50)")
                         .HasColumnName("login");
 
                     b.Property<string>("Mail")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("varchar(50)")
+                        .HasColumnType("nvarchar(50)")
                         .HasColumnName("mail");
 
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("varchar(50)")
+                        .HasColumnType("nvarchar(50)")
                         .HasColumnName("password");
+
+                    b.Property<int?>("RoleId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("role_id")
+                        .HasDefaultValueSql("NULL");
 
                     b.HasKey("Id");
 
-                    b.ToTable("user");
+                    b.HasIndex(new[] { "RoleId" }, "role_id");
+
+                    b.ToTable("user", (string)null);
                 });
 
             modelBuilder.Entity("GameStore.Domain.Models.Game", b =>
@@ -386,14 +444,14 @@ namespace GameStore.DAL.Migrations
                     b.HasOne("GameStore.Domain.Models.Developer", "Developer")
                         .WithMany("Games")
                         .HasForeignKey("DeveloperId")
-                        .HasConstraintName("FK_game_developer_id")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("FK_game_developer_id");
 
                     b.HasOne("GameStore.Domain.Models.Publisher", "Publisher")
                         .WithMany("Games")
                         .HasForeignKey("PublisherId")
-                        .HasConstraintName("FK_game_publisher_id")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("FK_game_publisher_id");
 
                     b.Navigation("Developer");
 
@@ -405,16 +463,16 @@ namespace GameStore.DAL.Migrations
                     b.HasOne("GameStore.Domain.Models.Game", "Game")
                         .WithMany("GameGenres")
                         .HasForeignKey("GameId")
-                        .HasConstraintName("FK_game_genre_game_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK_game_genre_game_id");
 
                     b.HasOne("GameStore.Domain.Models.Genre", "Genre")
                         .WithMany("GameGenres")
                         .HasForeignKey("GenreId")
-                        .HasConstraintName("FK_game_genre_genre_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK_game_genre_genre_id");
 
                     b.Navigation("Game");
 
@@ -426,16 +484,16 @@ namespace GameStore.DAL.Migrations
                     b.HasOne("GameStore.Domain.Models.Game", "Game")
                         .WithMany("GameOrders")
                         .HasForeignKey("GameId")
-                        .HasConstraintName("FK_game_order_game_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK_game_order_game_id");
 
                     b.HasOne("GameStore.Domain.Models.Order", "Order")
                         .WithMany("GameOrders")
                         .HasForeignKey("OrderId")
-                        .HasConstraintName("FK_game_order_order_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK_game_order_order_id");
 
                     b.Navigation("Game");
 
@@ -447,14 +505,14 @@ namespace GameStore.DAL.Migrations
                     b.HasOne("GameStore.Domain.Models.Activation", "Activation")
                         .WithMany("Keys")
                         .HasForeignKey("ActivationId")
-                        .HasConstraintName("FK_key_activation_id")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("FK_key_activation_id");
 
                     b.HasOne("GameStore.Domain.Models.Game", "Game")
                         .WithMany("Keys")
                         .HasForeignKey("GameId")
-                        .HasConstraintName("FK_key_game_id")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("FK_key_game_id");
 
                     b.Navigation("Activation");
 
@@ -466,16 +524,16 @@ namespace GameStore.DAL.Migrations
                     b.HasOne("GameStore.Domain.Models.Game", "Game")
                         .WithMany("MinimumSpecifications")
                         .HasForeignKey("GameId")
-                        .HasConstraintName("FK_minimum_specification_game_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK_minimum_specification_game_id");
 
                     b.HasOne("GameStore.Domain.Models.Platform", "Platform")
                         .WithMany("MinimumSpecifications")
                         .HasForeignKey("PlatformId")
-                        .HasConstraintName("FK_minimum_specification_platform_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK_minimum_specification_platform_id");
 
                     b.Navigation("Game");
 
@@ -487,10 +545,21 @@ namespace GameStore.DAL.Migrations
                     b.HasOne("GameStore.Domain.Models.User", "User")
                         .WithMany("Orders")
                         .HasForeignKey("UserId")
-                        .HasConstraintName("FK_order_user_id")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("FK_order_user_id");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("GameStore.Domain.Models.User", b =>
+                {
+                    b.HasOne("GameStore.Domain.Models.Role", "Role")
+                        .WithMany("Users")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("FK_role_id");
+
+                    b.Navigation("Role");
                 });
 
             modelBuilder.Entity("GameStore.Domain.Models.Activation", b =>
@@ -532,6 +601,11 @@ namespace GameStore.DAL.Migrations
             modelBuilder.Entity("GameStore.Domain.Models.Publisher", b =>
                 {
                     b.Navigation("Games");
+                });
+
+            modelBuilder.Entity("GameStore.Domain.Models.Role", b =>
+                {
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("GameStore.Domain.Models.User", b =>
