@@ -14,7 +14,9 @@ namespace GameStore.Domain.Models
         public string Password { get; set; }
         public string Mail { get; set; }
         public decimal Balance { get; set; }
+        public int? RoleId { get; set; }
 
+        public virtual Role Role { get; set; }
         public virtual ICollection<Order> Orders { get; set; }
     }
 }

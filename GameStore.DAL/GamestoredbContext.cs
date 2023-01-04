@@ -30,13 +30,15 @@ namespace GameStore.DAL
         public virtual DbSet<Platform> Platforms { get; set; }
         public virtual DbSet<Publisher> Publishers { get; set; }
         public virtual DbSet<User> Users { get; set; }
+        public virtual DbSet<Role> Roles { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
              if (!optionsBuilder.IsConfigured)
              {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseMySQL("server=localhost;user=root;password=123123123;database=gamestoredb");
+                //optionsBuilder.UseMySQL("server=localhost;user=root;password=123123123;database=gamestoredb");
+                optionsBuilder.UseSqlServer(@"Data Source=.\SQLEXPRESS;Initial Catalog=gamestoredb;Integrated Security=True;MultipleActiveResultSets=True;TrustServerCertificate=True;");
             }
         }
 
@@ -50,7 +52,7 @@ namespace GameStore.DAL
                     .IsUnique();
 
                 entity.Property(e => e.Id)
-                    .HasColumnType("int(11)")
+                    .HasColumnType("int")
                     .HasColumnName("id");
 
                 entity.Property(e => e.Name)
@@ -67,7 +69,7 @@ namespace GameStore.DAL
                     .IsUnique();
 
                 entity.Property(e => e.Id)
-                    .HasColumnType("int(11)")
+                    .HasColumnType("int")
                     .HasColumnName("id");
 
                 entity.Property(e => e.Name)
@@ -88,7 +90,7 @@ namespace GameStore.DAL
                 entity.HasIndex(e => e.PublisherId, "publisher_id");
 
                 entity.Property(e => e.Id)
-                    .HasColumnType("int(11)")
+                    .HasColumnType("int")
                     .HasColumnName("id");
 
                 entity.Property(e => e.AvatarPath)
@@ -97,7 +99,7 @@ namespace GameStore.DAL
                     .HasDefaultValueSql("NULL");
 
                 entity.Property(e => e.DeveloperId)
-                    .HasColumnType("int(11)")
+                    .HasColumnType("int")
                     .HasColumnName("developer_id")
                     .HasDefaultValueSql("NULL");
 
@@ -115,7 +117,7 @@ namespace GameStore.DAL
                     .HasColumnName("price");
 
                 entity.Property(e => e.PublisherId)
-                    .HasColumnType("int(11)")
+                    .HasColumnType("int")
                     .HasColumnName("publisher_id")
                     .HasDefaultValueSql("NULL");
 
@@ -144,16 +146,16 @@ namespace GameStore.DAL
             modelBuilder.Entity<GameGenre>(entity =>
             {
                 entity.HasKey(e => new { e.GameId, e.GenreId })
-                    .HasName("PRIMARY");
+                    .HasName("Primary_Game_Genre");
 
                 entity.ToTable("game_genre");
                 
                 entity.Property(e => e.GameId)
-                    .HasColumnType("int(11)")
+                    .HasColumnType("int")
                     .HasColumnName("game_id");
 
                 entity.Property(e => e.GenreId)
-                    .HasColumnType("int(11)")
+                    .HasColumnType("int")
                     .HasColumnName("genre_id");
 
                 entity.HasOne(d => d.Game)
@@ -170,16 +172,16 @@ namespace GameStore.DAL
             modelBuilder.Entity<GameOrder>(entity =>
             {
                 entity.HasKey(e => new { e.OrderId, e.GameId })
-                    .HasName("PRIMARY");
+                    .HasName("Primary_Game_Order");
 
                 entity.ToTable("game_order");
                 
                 entity.Property(e => e.OrderId)
-                    .HasColumnType("int(11)")
+                    .HasColumnType("int")
                     .HasColumnName("order_id");
 
                 entity.Property(e => e.GameId)
-                    .HasColumnType("int(11)")
+                    .HasColumnType("int")
                     .HasColumnName("game_id");
 
                 entity.HasOne(d => d.Order)
@@ -202,7 +204,7 @@ namespace GameStore.DAL
                     .IsUnique();
 
                 entity.Property(e => e.Id)
-                    .HasColumnType("int(11)")
+                    .HasColumnType("int")
                     .HasColumnName("id");
 
                 entity.Property(e => e.Name)
@@ -223,16 +225,16 @@ namespace GameStore.DAL
                     .IsUnique();
 
                 entity.Property(e => e.Id)
-                    .HasColumnType("int(11)")
+                    .HasColumnType("int")
                     .HasColumnName("id");
 
                 entity.Property(e => e.ActivationId)
-                    .HasColumnType("int(11)")
+                    .HasColumnType("int")
                     .HasColumnName("activation_id")
                     .HasDefaultValueSql("NULL");
 
                 entity.Property(e => e.GameId)
-                    .HasColumnType("int(11)")
+                    .HasColumnType("int")
                     .HasColumnName("game_id")
                     .HasDefaultValueSql("NULL");
 
@@ -266,11 +268,11 @@ namespace GameStore.DAL
                     .IsUnique();
 
                 entity.Property(e => e.Id)
-                    .HasColumnType("int(11)")
+                    .HasColumnType("int")
                     .HasColumnName("id");
 
                 entity.Property(e => e.GameId)
-                    .HasColumnType("int(11)")
+                    .HasColumnType("int")
                     .HasColumnName("game_id");
 
                 entity.Property(e => e.Graphics)
@@ -289,7 +291,7 @@ namespace GameStore.DAL
                     .HasColumnName("os");
 
                 entity.Property(e => e.PlatformId)
-                    .HasColumnType("int(11)")
+                    .HasColumnType("int")
                     .HasColumnName("platform_id");
 
                 entity.Property(e => e.Processor)
@@ -320,7 +322,7 @@ namespace GameStore.DAL
                 entity.HasIndex(e => e.UserId, "user_id");
 
                 entity.Property(e => e.Id)
-                    .HasColumnType("int(11)")
+                    .HasColumnType("int")
                     .HasColumnName("id");
 
                 entity.Property(e => e.Amount)
@@ -332,7 +334,7 @@ namespace GameStore.DAL
                     .HasColumnName("pay_on");
 
                 entity.Property(e => e.UserId)
-                    .HasColumnType("int(11)")
+                    .HasColumnType("int")
                     .HasColumnName("user_id")
                     .HasDefaultValueSql("NULL");
 
@@ -351,7 +353,7 @@ namespace GameStore.DAL
                     .IsUnique();
 
                 entity.Property(e => e.Id)
-                    .HasColumnType("int(11)")
+                    .HasColumnType("int")
                     .HasColumnName("id");
 
                 entity.Property(e => e.Name)
@@ -368,7 +370,7 @@ namespace GameStore.DAL
                     .IsUnique();
 
                 entity.Property(e => e.Id)
-                    .HasColumnType("int(11)")
+                    .HasColumnType("int")
                     .HasColumnName("id");
 
                 entity.Property(e => e.Name)
@@ -381,9 +383,16 @@ namespace GameStore.DAL
             {
                 entity.ToTable("user");
 
+                entity.HasIndex(e => e.RoleId, "role_id");
+
                 entity.Property(e => e.Id)
-                    .HasColumnType("int(11)")
+                    .HasColumnType("int")
                     .HasColumnName("id");
+
+                entity.Property(e => e.RoleId)
+                    .HasColumnType("int")
+                    .HasColumnName("role_id")
+                    .HasDefaultValueSql("NULL");
 
                 entity.Property(e => e.Balance)
                     .HasColumnType("decimal(20,2)")
@@ -403,6 +412,31 @@ namespace GameStore.DAL
                     .IsRequired()
                     .HasMaxLength(50)
                     .HasColumnName("password");
+
+                
+
+                entity.HasOne(d => d.Role)
+                    .WithMany(p => p.Users)
+                    .HasForeignKey(d => d.RoleId)
+                    .OnDelete(DeleteBehavior.SetNull)
+                    .HasConstraintName("FK_role_id");
+            });
+
+            modelBuilder.Entity<Role>(entity =>
+            {
+                entity.ToTable("role");
+
+                entity.Property(e => e.Id)
+                   .HasColumnType("int")
+                   .HasColumnName("id");
+
+                entity.HasIndex(e => e.AccessRole, "access_role")
+                    .IsUnique();
+
+                entity.Property(e => e.AccessRole)
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .HasColumnName("access_role");
             });
 
             OnModelCreatingPartial(modelBuilder);

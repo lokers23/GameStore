@@ -1,12 +1,15 @@
 ﻿using GameStore.Domain.Models;
+using GameStore.Domain.Response;
+using GameStore.Domain.ViewModels.Genre;
 
 namespace GameStore.Service.Interfaces;
 
 public interface IGenreService
 {
-    Task<bool> CreateGenreAsync(Genre genre);
-    Task<List<Genre>> GetGenresAsync();
-    Task<Genre?> GetGenreByIdAsync(int id);
-    Task<bool> UpdateGenreAsync(Genre genre);
-    Task<bool> DeleteGenreAsync(int id);
+    //Task<Response<Genre?>> SaveGenreAsync(Genre genre);
+    Task<Response<Genre?>> CreateGenreAsync(GenreViewModel genre);
+    Task<Response<Genre?>> UpdateGenreAsync(int id, GenreViewModel genre);
+    Task<Response<List<Genre>?>> GetGenresAsync();
+    Task<Response<Genre?>> GetGenreByIdAsync(int id);
+    Task<Response<bool?>> DeleteGenreAsync(int id);
 }

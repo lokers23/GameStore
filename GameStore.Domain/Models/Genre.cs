@@ -1,5 +1,8 @@
 ﻿#nullable disable
 
+
+using Newtonsoft.Json;
+
 namespace GameStore.Domain.Models
 {
     public partial class Genre
