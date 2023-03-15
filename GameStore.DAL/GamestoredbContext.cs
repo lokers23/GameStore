@@ -30,7 +30,8 @@ namespace GameStore.DAL
         public virtual DbSet<Platform> Platforms { get; set; }
         public virtual DbSet<Publisher> Publishers { get; set; }
         public virtual DbSet<User> Users { get; set; }
-        public virtual DbSet<Role> Roles { get; set; }
+        //public virtual DbSet<Role> Roles { get; set; }
+        public virtual DbSet<Image> Images { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -88,7 +89,7 @@ namespace GameStore.DAL
                     .IsUnique();
 
                 entity.HasIndex(e => e.PublisherId, "publisher_id");
-
+                
                 entity.Property(e => e.Id)
                     .HasColumnType("int")
                     .HasColumnName("id");
@@ -168,7 +169,33 @@ namespace GameStore.DAL
                     .HasForeignKey(d => d.GenreId)
                     .HasConstraintName("FK_game_genre_genre_id");
             });
+            
+            modelBuilder.Entity<GameMinSpecification>(entity =>
+            {
+                entity.HasKey(e => new { e.GameId, e.MinimumSpecificationId })
+                    .HasName("Primary_Game_Min_Spec");
 
+                entity.ToTable("game_min_spec");
+                
+                entity.Property(e => e.GameId)
+                    .HasColumnType("int")
+                    .HasColumnName("game_id");
+
+                entity.Property(e => e.MinimumSpecificationId)
+                    .HasColumnType("int")
+                    .HasColumnName("min_spec_id");
+
+                entity.HasOne(d => d.Game)
+                    .WithMany(p => p.GameMinSpecifications)
+                    .HasForeignKey(d => d.GameId)
+                    .HasConstraintName("FK_game_min_spec_game_id");
+
+                entity.HasOne(d => d.MinimumSpecification)
+                    .WithMany(p => p.GameMinSpecification)
+                    .HasForeignKey(d => d.MinimumSpecificationId)
+                    .HasConstraintName("FK_game_min_spec_min_spec_id");
+            });
+            
             modelBuilder.Entity<GameOrder>(entity =>
             {
                 entity.HasKey(e => new { e.OrderId, e.GameId })
@@ -189,7 +216,6 @@ namespace GameStore.DAL
                     .HasForeignKey(d => d.OrderId)
                     .HasConstraintName("FK_game_order_order_id");
                 
-                //тут добавлял своё
                 entity.HasOne(d => d.Game)
                     .WithMany(p => p.GameOrders)
                     .HasForeignKey(d => d.GameId)
@@ -262,18 +288,9 @@ namespace GameStore.DAL
             {
                 entity.ToTable("minimum_specification");
 
-                entity.HasIndex(e => e.GameId, "game_id");
-
-                entity.HasIndex(e => new { e.PlatformId, e.GameId }, "platform_id_game_id")
-                    .IsUnique();
-
                 entity.Property(e => e.Id)
                     .HasColumnType("int")
                     .HasColumnName("id");
-
-                entity.Property(e => e.GameId)
-                    .HasColumnType("int")
-                    .HasColumnName("game_id");
 
                 entity.Property(e => e.Graphics)
                     .IsRequired()
@@ -285,10 +302,10 @@ namespace GameStore.DAL
                     .HasMaxLength(50)
                     .HasColumnName("memory");
 
-                entity.Property(e => e.Os)
+                entity.Property(e => e.OperatingSystem)
                     .IsRequired()
                     .HasMaxLength(100)
-                    .HasColumnName("os");
+                    .HasColumnName("operating_system");
 
                 entity.Property(e => e.PlatformId)
                     .HasColumnType("int")
@@ -303,12 +320,7 @@ namespace GameStore.DAL
                     .IsRequired()
                     .HasMaxLength(50)
                     .HasColumnName("storage");
-
-                entity.HasOne(d => d.Game)
-                    .WithMany(p => p.MinimumSpecifications)
-                    .HasForeignKey(d => d.GameId)
-                    .HasConstraintName("FK_minimum_specification_game_id");
-
+                
                 entity.HasOne(d => d.Platform)
                     .WithMany(p => p.MinimumSpecifications)
                     .HasForeignKey(d => d.PlatformId)
@@ -383,16 +395,19 @@ namespace GameStore.DAL
             {
                 entity.ToTable("user");
 
-                entity.HasIndex(e => e.RoleId, "role_id");
+                //entity.HasIndex(e => e.RoleId, "role_id");
 
                 entity.Property(e => e.Id)
                     .HasColumnType("int")
                     .HasColumnName("id");
 
-                entity.Property(e => e.RoleId)
-                    .HasColumnType("int")
-                    .HasColumnName("role_id")
-                    .HasDefaultValueSql("NULL");
+                // entity.Property(e => e.RoleId)
+                //     .HasColumnType("int")
+                //     .HasColumnName("role_id")
+                //     .HasDefaultValueSql("NULL");
+
+                entity.Property(e => e.Role)
+                    .HasConversion<int>();
 
                 entity.Property(e => e.Balance)
                     .HasColumnType("decimal(20,2)")
@@ -410,33 +425,57 @@ namespace GameStore.DAL
 
                 entity.Property(e => e.Password)
                     .IsRequired()
-                    .HasMaxLength(50)
+                    .HasMaxLength(255)
                     .HasColumnName("password");
-
                 
-
-                entity.HasOne(d => d.Role)
-                    .WithMany(p => p.Users)
-                    .HasForeignKey(d => d.RoleId)
-                    .OnDelete(DeleteBehavior.SetNull)
-                    .HasConstraintName("FK_role_id");
+                // entity.HasOne(d => d.Role)
+                //     .WithMany(p => p.Users)
+                //     .HasForeignKey(d => d.RoleId)
+                //     .OnDelete(DeleteBehavior.SetNull)
+                //     .HasConstraintName("FK_role_id");
             });
 
-            modelBuilder.Entity<Role>(entity =>
+            // modelBuilder.Entity<Role>(entity =>
+            // {
+            //     entity.ToTable("role");
+            //
+            //     entity.Property(e => e.Id)
+            //        .HasColumnType("int")
+            //        .HasColumnName("id");
+            //
+            //     entity.HasIndex(e => e.AccessRole, "access_role")
+            //         .IsUnique();
+            //
+            //     entity.Property(e => e.AccessRole)
+            //         .IsRequired()
+            //         .HasMaxLength(100)
+            //         .HasColumnName("access_role");
+            // });
+            
+            modelBuilder.Entity<Image>(entity =>
             {
-                entity.ToTable("role");
+                entity.ToTable("image");
 
+                entity.HasIndex(e => e.GameId, "game_id");
+                
                 entity.Property(e => e.Id)
-                   .HasColumnType("int")
-                   .HasColumnName("id");
+                    .HasColumnType("int")
+                    .HasColumnName("id");
 
-                entity.HasIndex(e => e.AccessRole, "access_role")
-                    .IsUnique();
-
-                entity.Property(e => e.AccessRole)
+                entity.Property(e => e.Path)
                     .IsRequired()
                     .HasMaxLength(100)
-                    .HasColumnName("access_role");
+                    .HasColumnName("path");
+                
+                entity.Property(e => e.GameId)
+                    .IsRequired()
+                    .HasColumnType("int")
+                    .HasColumnName("game_id");
+
+                entity.HasOne(d => d.Game)
+                    .WithMany(p => p.Images)
+                    .HasForeignKey(d => d.GameId)
+                    .HasConstraintName("FK_image_game_id");
             });
 
             OnModelCreatingPartial(modelBuilder);

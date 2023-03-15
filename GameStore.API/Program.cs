@@ -10,7 +10,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using NLog.Web;
-using Swashbuckle.AspNetCore.Filters;
 using System.Security.Claims;
 using System.Text.Json.Serialization;
 
@@ -26,23 +25,59 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull; 
     });
 
-
 builder.Logging.ClearProviders();
 builder.Host.UseNLog();
 
-#region Services for add to scope
+builder.Services.AddEndpointsApiExplorer();
+#region Services for add to scope service
 builder.Services.AddScoped<IGenreService, GenreService>();
-//builder.Services.AddScoped<IGameService, GameService>();
-//builder.Services.AddScoped<IActivationService, ActivationService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IDeveloperService, DeveloperService>();
+builder.Services.AddScoped<IPublisherService, PublisherService>();
+builder.Services.AddScoped<IMinSpecificationService, MinSpecificationService>();
+builder.Services.AddScoped<IImageService, ImageService>();
+#endregion
 
+#region Services for add to scope repository
 builder.Services.AddScoped<IRepository<Genre>, GenreRepository>();
-//builder.Services.AddScoped<IRepository<Game>, GameRepository>();
-//builder.Services.AddScoped<IRepository<Activation>, ActivationRepository>();
 builder.Services.AddScoped<IRepository<User>, UserRepository>();
+builder.Services.AddScoped<IRepository<Developer>, DeveloperRepository>();
+builder.Services.AddScoped<IRepository<Publisher>, PublisherRepository>();
+builder.Services.AddScoped<IRepository<MinimumSpecification>, MinSpecificationRepository>();
+builder.Services.AddScoped<IRepository<Image>, ImageRepository>();
+
+#endregion
 
 builder.Services.AddDbContext<GamestoredbContext>();
-#endregion
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo() { Title = "GameStoreAPI", Version = "v1" } );
+    
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "Bearer",
+        In = ParameterLocation.Header,
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT"
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement()
+    {
+        {
+            new OpenApiSecurityScheme()
+            {
+                Reference = new OpenApiReference()
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 
 builder.Services.AddCors();
 
@@ -61,45 +96,28 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization(config =>
 {
-    config.AddPolicy(nameof(AccessRole.Administrator), builder =>
+    config.AddPolicy(nameof(AccessRole.Administrator), policy =>
     {
-        builder.RequireClaim(ClaimTypes.Role, nameof(AccessRole.Administrator));
+        policy.RequireClaim(ClaimTypes.Role, nameof(AccessRole.Administrator));
     });
 
-    config.AddPolicy(nameof(AccessRole.Moderator), builder =>
+    config.AddPolicy(nameof(AccessRole.Moderator), policy =>
     {
-        builder.RequireAssertion(x => x.User.HasClaim(ClaimTypes.Role, nameof(AccessRole.Administrator))
+        policy.RequireAssertion(x => 
+                                      x.User.HasClaim(ClaimTypes.Role, nameof(AccessRole.Administrator))
                                    || x.User.HasClaim(ClaimTypes.Role, nameof(AccessRole.Moderator)));
     });
 
-    config.AddPolicy(nameof(AccessRole.User), builder =>
+    config.AddPolicy(nameof(AccessRole.User), policy =>
     {
-        builder.RequireAssertion(x => x.User.HasClaim(ClaimTypes.Role, nameof(AccessRole.Administrator))
+        policy.RequireAssertion(x => 
+                                      x.User.HasClaim(ClaimTypes.Role, nameof(AccessRole.Administrator))
                                    || x.User.HasClaim(ClaimTypes.Role, nameof(AccessRole.Moderator))
                                    || x.User.HasClaim(ClaimTypes.Role, nameof(AccessRole.User)));
     });
 });
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
-{
-    options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
-    {
-        Description = "OAuth2",
-        In = ParameterLocation.Header,
-        Name = "Authorization",
-        Type = SecuritySchemeType.ApiKey
-    });
-
-    options.OperationFilter<SecurityRequirementsOperationFilter>();
-});
-
 var app = builder.Build();
-
-
-app.UseCors(c => c.AllowAnyHeader()
-    .AllowAnyMethod()
-    .AllowAnyOrigin());
 
 using (var scope = app.Services.CreateScope())
 {
@@ -110,10 +128,15 @@ using (var scope = app.Services.CreateScope())
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "GameStoreAPI");
+    });
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors(c => c.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
 
 app.UseAuthentication();
 app.UseAuthorization();

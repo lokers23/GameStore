@@ -10,6 +10,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using GameStore.Domain.Helpers;
+using GameStore.Domain.ViewModels.Account;
 
 namespace GameStore.Service.Services
 {
@@ -25,7 +27,112 @@ namespace GameStore.Service.Services
             _configuration = configuration;
         }
 
-        public async Task<Response<bool>> CreateUserAsync(User user)
+        public async Task<Response<List<User>>> GetUsersAsync()
+        {
+            try
+            {
+                var users = await _repository.GetAll().ToListAsync();
+
+                var response = new Response<List<User>>()
+                {
+                    Data = users,
+                    Status = HttpStatusCode.Ok
+                };
+
+                return response;
+            }
+            catch (Exception exception)
+            {
+                var response = Catcher.CatchError<List<User>, UserService>(exception, _logger);
+                return response;
+                // _logger.LogError(exception, exception.Message);
+                //
+                // var response = new Response<List<User>>()
+                // {
+                //     Message = "Ошибка произошла на сервере",
+                //     Status = HttpStatusCode.ServerError
+                // };
+                //
+                // return response;
+            }
+        }
+        public async Task<Response<User?>> GetUserByIdAsync(int id)
+        {
+            try
+            {
+                var response = new Response<User?>()
+                {
+                    Status = HttpStatusCode.Ok
+                };
+
+                var user = await _repository.GetAll()
+                    .FirstOrDefaultAsync(x => x.Id == id);
+
+                response.Data = user;
+
+                if (user == null)
+                {
+                    response.Message = "Пользователь не найден";
+                    response.Status = HttpStatusCode.NotFound;
+                    return response;
+                }
+
+                return response;
+            }
+            catch (Exception exception)
+            {
+                var response = Catcher.CatchError<User?, UserService>(exception, _logger);
+                return response;
+                // _logger.LogError(exception, exception.Message);
+                //
+                // var response = new Response<User?>()
+                // {
+                //     Message = "Ошибка произошла на сервере",
+                //     Status = HttpStatusCode.ServerError
+                // };
+                //
+                // return response;
+            }
+        }
+        public async Task<Response<User?>> GetUserByLoginAsync(string login)
+        {
+            try
+            {
+                var user = await _repository.GetAll()
+                    .FirstOrDefaultAsync(u => u.Login.Equals(login));
+
+                var response = new Response<User?>()
+                {
+                    Data = user,
+                    Status = HttpStatusCode.Ok
+                };
+
+                if (user == null)
+                {
+                    response.Status = HttpStatusCode.NotFound;
+                    response.Message = "Пользователя с таким логином не существует";
+
+                    return response;
+                }
+
+                return response;
+            }
+            catch (Exception exception)
+            {
+                var response = Catcher.CatchError<User?, UserService>(exception, _logger);
+                return response;
+                // _logger.LogError(exception, exception.Message);
+                //
+                // var response = new Response<User?>()
+                // {
+                //     Message = "Ошибка произошла на сервере",
+                //     Status = HttpStatusCode.ServerError
+                // };
+                //
+                // return response;
+            }
+        }
+        public async Task<Response<bool>> CreateUserAsync(RegistrationViewModel viewModel)
         {
             try
             {
@@ -35,25 +142,36 @@ namespace GameStore.Service.Services
                     Status = HttpStatusCode.Created
                 };
 
+                var user = new User()
+                {
+                    Id = 0,
+                    Login = viewModel.Login,
+                    Password = viewModel.Password,
+                    Mail = viewModel.Mail,
+                    Role = AccessRole.User,
+                    Balance = 0
+                };
+                
                 await _repository.CreateAsync(user);
-
+                
                 return response;
             }
             catch (Exception exception)
             {
-                _logger.LogError(exception, exception.Message);
-
-                var response = new Response<bool>()
-                {
-                    Data = false,
-                    Message = "Ошибка произошла на сервере",
-                    Status = HttpStatusCode.ServerError
-                };
-
+                var response = Catcher.CatchError<bool, UserService>(exception, _logger);
                 return response;
+                // _logger.LogError(exception, exception.Message);
+                //
+                // var response = new Response<bool>()
+                // {
+                //     Data = false,
+                //     Message = "Ошибка произошла на сервере",
+                //     Status = HttpStatusCode.ServerError
+                // };
+
+                //return response;
             }
         }
-
         public async Task<Response<bool>> DeleteUserAsync(int id)
         {
             try
@@ -80,121 +198,20 @@ namespace GameStore.Service.Services
             }
             catch (Exception exception)
             {
-                _logger.LogError(exception, exception.Message);
-
-                var response = new Response<bool>()
-                {
-                    Data = false,
-                    Message = "Ошибка произошла на сервере",
-                    Status = HttpStatusCode.ServerError
-                };
-
+                var response = Catcher.CatchError<bool, UserService>(exception, _logger);
                 return response;
+                // _logger.LogError(exception, exception.Message);
+                //
+                // var response = new Response<bool>()
+                // {
+                //     Data = false,
+                //     Message = "Ошибка произошла на сервере",
+                //     Status = HttpStatusCode.ServerError
+                // };
+                //
+                // return response;
             }
         }
-
-        public async Task<Response<User?>> GetUserByIdAsync(int id)
-        {
-            try
-            {
-                var response = new Response<User?>()
-                {
-                    Status = HttpStatusCode.Ok
-                };
-
-                var user = await _repository.GetAll()
-                    .FirstOrDefaultAsync(x => x.Id == id);
-
-                response.Data = user;
-
-                if (user == null)
-                {
-                    response.Message = "Пользователь не найден";
-                    response.Status = HttpStatusCode.NotFound;
-                    return response;
-                }
-
-                return response;
-            }
-            catch (Exception exception)
-            {
-                _logger.LogError(exception, exception.Message);
-
-                var response = new Response<User?>()
-                {
-                    Message = "Ошибка произошла на сервере",
-                    Status = HttpStatusCode.ServerError
-                };
-
-                return response;
-            }
-        }
-
-        public async Task<Response<User?>> GetUserByLoginAsync(string login)
-        {
-            try
-            {
-                var user = await _repository.GetAll()
-                    .FirstOrDefaultAsync(u => u.Login.Equals(login));
-
-                var response = new Response<User?>()
-                {
-                    Data = user,
-                    Status = HttpStatusCode.Ok
-                };
-
-                if (user == null)
-                {
-                    response.Status = HttpStatusCode.NotFound;
-                    response.Message = "Пользователя с таким логином не существует";
-
-                    return response;
-                }
-
-                return response;
-            }
-            catch (Exception exception)
-            {
-                _logger.LogError(exception, exception.Message);
-
-                var response = new Response<User?>()
-                {
-                    Message = "Ошибка произошла на сервере",
-                    Status = HttpStatusCode.ServerError
-                };
-
-                return response;
-            }
-        }
-
-        public async Task<Response<List<User>>> GetUsersAsync()
-        {
-            try
-            {
-                var users = await _repository.GetAll().ToListAsync();
-
-                var response = new Response<List<User>>()
-                {
-                    Data = users,
-                    Status = HttpStatusCode.Ok
-                };
-
-                return response;
-            }
-            catch (Exception exception)
-            {
-                _logger.LogError(exception, exception.Message);
-
-                var response = new Response<List<User>>()
-                {
-                    Message = "Ошибка произошла на сервере",
-                    Status = HttpStatusCode.ServerError
-                };
-
-                return response;
-            }
-        }
-
         public async Task<Response<bool>> UpdateUserAsync(User user)
         {
             try
@@ -225,25 +242,26 @@ namespace GameStore.Service.Services
             }
             catch (Exception exception)
             {
-                _logger.LogError(exception, exception.Message);
-
-                var response = new Response<bool>()
-                {
-                    Data = false,
-                    Message = "Ошибка произошла на сервере",
-                    Status = HttpStatusCode.ServerError
-                };
-
+                var response = Catcher.CatchError<bool, UserService>(exception, _logger);
                 return response;
+                // _logger.LogError(exception, exception.Message);
+                //
+                // var response = new Response<bool>()
+                // {
+                //     Data = false,
+                //     Message = "Ошибка произошла на сервере",
+                //     Status = HttpStatusCode.ServerError
+                // };
+                //
+                // return response;
             }
         }
-
-        public string CreateToken(User user, string role)
+        public string CreateToken(User user, AccessRole role)
         {
             List<Claim> claims = new()
             {
                 new Claim(ClaimTypes.Name, user.Login),
-                new Claim(ClaimTypes.Role, role)
+                new Claim(ClaimTypes.Role, role.ToString())
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(

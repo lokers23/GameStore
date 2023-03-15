@@ -27,13 +27,7 @@ namespace GameStore.DAL.Repositories
         {
             return _db.Genres;
         }
-
-        //public async Task<Genre?> GetByIdAsync(int id)
-        //{
-        //    var genre = await _db.Genres.FirstOrDefaultAsync(genre => genre.Id == id);
-        //    return genre;
-        //}
-
+        
         public async Task UpdateAsync(Genre model)
         {
             _db.Genres.Update(model);

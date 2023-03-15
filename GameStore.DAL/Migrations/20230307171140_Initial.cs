@@ -5,10 +5,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace GameStore.DAL.Migrations
 {
-    /// <inheritdoc />
-    public partial class roles : Migration
+    public partial class Initial : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
@@ -77,51 +75,6 @@ namespace GameStore.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "role",
-                columns: table => new
-                {
-                    id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    accessrole = table.Column<int>(name: "access_role", type: "int", maxLength: 100, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_role", x => x.id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "game",
-                columns: table => new
-                {
-                    id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    developerid = table.Column<int>(name: "developer_id", type: "int", nullable: true, defaultValueSql: "NULL"),
-                    publisherid = table.Column<int>(name: "publisher_id", type: "int", nullable: true, defaultValueSql: "NULL"),
-                    releaseon = table.Column<DateTime>(name: "release_on", type: "date", nullable: false),
-                    description = table.Column<string>(type: "nvarchar(max)", nullable: true, defaultValueSql: "NULL"),
-                    price = table.Column<decimal>(type: "decimal(20,2)", nullable: false),
-                    videourl = table.Column<string>(name: "video_url", type: "nvarchar(1000)", maxLength: 1000, nullable: true, defaultValueSql: "NULL"),
-                    avatarpath = table.Column<string>(name: "avatar_path", type: "nvarchar(1000)", maxLength: 1000, nullable: true, defaultValueSql: "NULL")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_game", x => x.id);
-                    table.ForeignKey(
-                        name: "FK_game_developer_id",
-                        column: x => x.developerid,
-                        principalTable: "developer",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.SetNull);
-                    table.ForeignKey(
-                        name: "FK_game_publisher_id",
-                        column: x => x.publisherid,
-                        principalTable: "publisher",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.SetNull);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "user",
                 columns: table => new
                 {
@@ -131,15 +84,86 @@ namespace GameStore.DAL.Migrations
                     password = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     mail = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     balance = table.Column<decimal>(type: "decimal(20,2)", nullable: false),
-                    roleid = table.Column<int>(name: "role_id", type: "int", nullable: true, defaultValueSql: "NULL")
+                    Role = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_user", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "minimum_specification",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    operating_system = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    processor = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    memory = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    storage = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    graphics = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    platform_id = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_minimum_specification", x => x.id);
                     table.ForeignKey(
-                        name: "FK_role_id",
-                        column: x => x.roleid,
-                        principalTable: "role",
+                        name: "FK_minimum_specification_platform_id",
+                        column: x => x.platform_id,
+                        principalTable: "platform",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "game",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    developer_id = table.Column<int>(type: "int", nullable: true, defaultValueSql: "NULL"),
+                    publisher_id = table.Column<int>(type: "int", nullable: true, defaultValueSql: "NULL"),
+                    release_on = table.Column<DateTime>(type: "date", nullable: false),
+                    description = table.Column<string>(type: "nvarchar(max)", nullable: true, defaultValueSql: "NULL"),
+                    price = table.Column<decimal>(type: "decimal(20,2)", nullable: false),
+                    video_url = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true, defaultValueSql: "NULL"),
+                    avatar_path = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true, defaultValueSql: "NULL")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_game", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_game_developer_id",
+                        column: x => x.developer_id,
+                        principalTable: "developer",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_game_publisher_id",
+                        column: x => x.publisher_id,
+                        principalTable: "publisher",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.SetNull);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "order",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    pay_on = table.Column<DateTime>(type: "date", nullable: false),
+                    amount = table.Column<decimal>(type: "decimal(20,2)", nullable: false),
+                    user_id = table.Column<int>(type: "int", nullable: true, defaultValueSql: "NULL")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_order", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_order_user_id",
+                        column: x => x.user_id,
+                        principalTable: "user",
                         principalColumn: "id",
                         onDelete: ReferentialAction.SetNull);
                 });
@@ -148,22 +172,66 @@ namespace GameStore.DAL.Migrations
                 name: "game_genre",
                 columns: table => new
                 {
-                    gameid = table.Column<int>(name: "game_id", type: "int", nullable: false),
-                    genreid = table.Column<int>(name: "genre_id", type: "int", nullable: false)
+                    game_id = table.Column<int>(type: "int", nullable: false),
+                    genre_id = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("Primary_Game_Genre", x => new { x.gameid, x.genreid });
+                    table.PrimaryKey("Primary_Game_Genre", x => new { x.game_id, x.genre_id });
                     table.ForeignKey(
                         name: "FK_game_genre_game_id",
-                        column: x => x.gameid,
+                        column: x => x.game_id,
                         principalTable: "game",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_game_genre_genre_id",
-                        column: x => x.genreid,
+                        column: x => x.genre_id,
                         principalTable: "genre",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "game_min_spec",
+                columns: table => new
+                {
+                    game_id = table.Column<int>(type: "int", nullable: false),
+                    min_spec_id = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("Primary_Game_Min_Spec", x => new { x.game_id, x.min_spec_id });
+                    table.ForeignKey(
+                        name: "FK_game_min_spec_game_id",
+                        column: x => x.game_id,
+                        principalTable: "game",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_game_min_spec_min_spec_id",
+                        column: x => x.min_spec_id,
+                        principalTable: "minimum_specification",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "image",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    path = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    game_id = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_image", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_image_game_id",
+                        column: x => x.game_id,
+                        principalTable: "game",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -175,75 +243,23 @@ namespace GameStore.DAL.Migrations
                     id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     value = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    gameid = table.Column<int>(name: "game_id", type: "int", nullable: true, defaultValueSql: "NULL"),
-                    activationid = table.Column<int>(name: "activation_id", type: "int", nullable: true, defaultValueSql: "NULL"),
-                    isused = table.Column<bool>(name: "is_used", type: "bit", nullable: false)
+                    game_id = table.Column<int>(type: "int", nullable: true, defaultValueSql: "NULL"),
+                    activation_id = table.Column<int>(type: "int", nullable: true, defaultValueSql: "NULL"),
+                    is_used = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_key", x => x.id);
                     table.ForeignKey(
                         name: "FK_key_activation_id",
-                        column: x => x.activationid,
+                        column: x => x.activation_id,
                         principalTable: "activation",
                         principalColumn: "id",
                         onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
                         name: "FK_key_game_id",
-                        column: x => x.gameid,
+                        column: x => x.game_id,
                         principalTable: "game",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.SetNull);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "minimum_specification",
-                columns: table => new
-                {
-                    id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    os = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    processor = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    memory = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    storage = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    graphics = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    platformid = table.Column<int>(name: "platform_id", type: "int", nullable: false),
-                    gameid = table.Column<int>(name: "game_id", type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_minimum_specification", x => x.id);
-                    table.ForeignKey(
-                        name: "FK_minimum_specification_game_id",
-                        column: x => x.gameid,
-                        principalTable: "game",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_minimum_specification_platform_id",
-                        column: x => x.platformid,
-                        principalTable: "platform",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "order",
-                columns: table => new
-                {
-                    id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    payon = table.Column<DateTime>(name: "pay_on", type: "date", nullable: false),
-                    amount = table.Column<decimal>(type: "decimal(20,2)", nullable: false),
-                    userid = table.Column<int>(name: "user_id", type: "int", nullable: true, defaultValueSql: "NULL")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_order", x => x.id);
-                    table.ForeignKey(
-                        name: "FK_order_user_id",
-                        column: x => x.userid,
-                        principalTable: "user",
                         principalColumn: "id",
                         onDelete: ReferentialAction.SetNull);
                 });
@@ -252,21 +268,21 @@ namespace GameStore.DAL.Migrations
                 name: "game_order",
                 columns: table => new
                 {
-                    orderid = table.Column<int>(name: "order_id", type: "int", nullable: false),
-                    gameid = table.Column<int>(name: "game_id", type: "int", nullable: false)
+                    order_id = table.Column<int>(type: "int", nullable: false),
+                    game_id = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("Primary_Game_Order", x => new { x.orderid, x.gameid });
+                    table.PrimaryKey("Primary_Game_Order", x => new { x.order_id, x.game_id });
                     table.ForeignKey(
                         name: "FK_game_order_game_id",
-                        column: x => x.gameid,
+                        column: x => x.game_id,
                         principalTable: "game",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_game_order_order_id",
-                        column: x => x.orderid,
+                        column: x => x.order_id,
                         principalTable: "order",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -279,7 +295,7 @@ namespace GameStore.DAL.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "name",
+                name: "name1",
                 table: "developer",
                 column: "name",
                 unique: true);
@@ -290,7 +306,7 @@ namespace GameStore.DAL.Migrations
                 column: "developer_id");
 
             migrationBuilder.CreateIndex(
-                name: "name",
+                name: "name2",
                 table: "game",
                 column: "name",
                 unique: true);
@@ -306,15 +322,25 @@ namespace GameStore.DAL.Migrations
                 column: "genre_id");
 
             migrationBuilder.CreateIndex(
+                name: "IX_game_min_spec_min_spec_id",
+                table: "game_min_spec",
+                column: "min_spec_id");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_game_order_game_id",
                 table: "game_order",
                 column: "game_id");
 
             migrationBuilder.CreateIndex(
-                name: "name",
+                name: "name3",
                 table: "genre",
                 column: "name",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "game_id",
+                table: "image",
+                column: "game_id");
 
             migrationBuilder.CreateIndex(
                 name: "activation_id",
@@ -322,7 +348,7 @@ namespace GameStore.DAL.Migrations
                 column: "activation_id");
 
             migrationBuilder.CreateIndex(
-                name: "game_id",
+                name: "game_id1",
                 table: "key",
                 column: "game_id");
 
@@ -333,15 +359,9 @@ namespace GameStore.DAL.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "game_id",
+                name: "IX_minimum_specification_platform_id",
                 table: "minimum_specification",
-                column: "game_id");
-
-            migrationBuilder.CreateIndex(
-                name: "platform_id_game_id",
-                table: "minimum_specification",
-                columns: new[] { "platform_id", "game_id" },
-                unique: true);
+                column: "platform_id");
 
             migrationBuilder.CreateIndex(
                 name: "user_id",
@@ -349,46 +369,40 @@ namespace GameStore.DAL.Migrations
                 column: "user_id");
 
             migrationBuilder.CreateIndex(
-                name: "name",
+                name: "name4",
                 table: "platform",
                 column: "name",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "name",
+                name: "name5",
                 table: "publisher",
                 column: "name",
                 unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "access_role",
-                table: "role",
-                column: "access_role",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "role_id",
-                table: "user",
-                column: "role_id");
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
                 name: "game_genre");
 
             migrationBuilder.DropTable(
+                name: "game_min_spec");
+
+            migrationBuilder.DropTable(
                 name: "game_order");
+
+            migrationBuilder.DropTable(
+                name: "image");
 
             migrationBuilder.DropTable(
                 name: "key");
 
             migrationBuilder.DropTable(
-                name: "minimum_specification");
+                name: "genre");
 
             migrationBuilder.DropTable(
-                name: "genre");
+                name: "minimum_specification");
 
             migrationBuilder.DropTable(
                 name: "order");
@@ -410,9 +424,6 @@ namespace GameStore.DAL.Migrations
 
             migrationBuilder.DropTable(
                 name: "publisher");
-
-            migrationBuilder.DropTable(
-                name: "role");
         }
     }
 }

@@ -17,10 +17,10 @@ namespace GameStore.DAL.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.0")
+                .HasAnnotation("ProductVersion", "6.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
             modelBuilder.Entity("GameStore.Domain.Models.Activation", b =>
                 {
@@ -29,7 +29,7 @@ namespace GameStore.DAL.Migrations
                         .HasColumnType("int")
                         .HasColumnName("id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -52,7 +52,7 @@ namespace GameStore.DAL.Migrations
                         .HasColumnType("int")
                         .HasColumnName("id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -63,7 +63,8 @@ namespace GameStore.DAL.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex(new[] { "Name" }, "name")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("name1");
 
                     b.ToTable("developer", (string)null);
                 });
@@ -75,7 +76,7 @@ namespace GameStore.DAL.Migrations
                         .HasColumnType("int")
                         .HasColumnName("id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("AvatarPath")
                         .ValueGeneratedOnAdd()
@@ -128,7 +129,8 @@ namespace GameStore.DAL.Migrations
                     b.HasIndex(new[] { "DeveloperId" }, "developer_id");
 
                     b.HasIndex(new[] { "Name" }, "name")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("name2");
 
                     b.HasIndex(new[] { "PublisherId" }, "publisher_id");
 
@@ -151,6 +153,24 @@ namespace GameStore.DAL.Migrations
                     b.HasIndex("GenreId");
 
                     b.ToTable("game_genre", (string)null);
+                });
+
+            modelBuilder.Entity("GameStore.Domain.Models.GameMinSpecification", b =>
+                {
+                    b.Property<int>("GameId")
+                        .HasColumnType("int")
+                        .HasColumnName("game_id");
+
+                    b.Property<int>("MinimumSpecificationId")
+                        .HasColumnType("int")
+                        .HasColumnName("min_spec_id");
+
+                    b.HasKey("GameId", "MinimumSpecificationId")
+                        .HasName("Primary_Game_Min_Spec");
+
+                    b.HasIndex("MinimumSpecificationId");
+
+                    b.ToTable("game_min_spec", (string)null);
                 });
 
             modelBuilder.Entity("GameStore.Domain.Models.GameOrder", b =>
@@ -178,7 +198,7 @@ namespace GameStore.DAL.Migrations
                         .HasColumnType("int")
                         .HasColumnName("id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -189,9 +209,36 @@ namespace GameStore.DAL.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex(new[] { "Name" }, "name")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("name3");
 
                     b.ToTable("genre", (string)null);
+                });
+
+            modelBuilder.Entity("GameStore.Domain.Models.Image", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<int>("GameId")
+                        .HasColumnType("int")
+                        .HasColumnName("game_id");
+
+                    b.Property<string>("Path")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("path");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex(new[] { "GameId" }, "game_id");
+
+                    b.ToTable("image", (string)null);
                 });
 
             modelBuilder.Entity("GameStore.Domain.Models.Key", b =>
@@ -201,7 +248,7 @@ namespace GameStore.DAL.Migrations
                         .HasColumnType("int")
                         .HasColumnName("id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<int?>("ActivationId")
                         .ValueGeneratedOnAdd()
@@ -229,7 +276,8 @@ namespace GameStore.DAL.Migrations
 
                     b.HasIndex(new[] { "ActivationId" }, "activation_id");
 
-                    b.HasIndex(new[] { "GameId" }, "game_id");
+                    b.HasIndex(new[] { "GameId" }, "game_id")
+                        .HasDatabaseName("game_id1");
 
                     b.HasIndex(new[] { "Value" }, "value")
                         .IsUnique();
@@ -244,11 +292,7 @@ namespace GameStore.DAL.Migrations
                         .HasColumnType("int")
                         .HasColumnName("id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("GameId")
-                        .HasColumnType("int")
-                        .HasColumnName("game_id");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("Graphics")
                         .IsRequired()
@@ -262,11 +306,11 @@ namespace GameStore.DAL.Migrations
                         .HasColumnType("nvarchar(50)")
                         .HasColumnName("memory");
 
-                    b.Property<string>("Os")
+                    b.Property<string>("OperatingSystem")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)")
-                        .HasColumnName("os");
+                        .HasColumnName("operating_system");
 
                     b.Property<int>("PlatformId")
                         .HasColumnType("int")
@@ -286,10 +330,7 @@ namespace GameStore.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex(new[] { "GameId" }, "game_id");
-
-                    b.HasIndex(new[] { "PlatformId", "GameId" }, "platform_id_game_id")
-                        .IsUnique();
+                    b.HasIndex("PlatformId");
 
                     b.ToTable("minimum_specification", (string)null);
                 });
@@ -301,7 +342,7 @@ namespace GameStore.DAL.Migrations
                         .HasColumnType("int")
                         .HasColumnName("id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(20,2)")
@@ -331,7 +372,7 @@ namespace GameStore.DAL.Migrations
                         .HasColumnType("int")
                         .HasColumnName("id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -342,7 +383,8 @@ namespace GameStore.DAL.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex(new[] { "Name" }, "name")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("name4");
 
                     b.ToTable("platform", (string)null);
                 });
@@ -354,7 +396,7 @@ namespace GameStore.DAL.Migrations
                         .HasColumnType("int")
                         .HasColumnName("id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -365,31 +407,10 @@ namespace GameStore.DAL.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex(new[] { "Name" }, "name")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("name5");
 
                     b.ToTable("publisher", (string)null);
-                });
-
-            modelBuilder.Entity("GameStore.Domain.Models.Role", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AccessRole")
-                        .HasMaxLength(100)
-                        .HasColumnType("int")
-                        .HasColumnName("access_role");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex(new[] { "AccessRole" }, "access_role")
-                        .IsUnique();
-
-                    b.ToTable("role", (string)null);
                 });
 
             modelBuilder.Entity("GameStore.Domain.Models.User", b =>
@@ -399,7 +420,7 @@ namespace GameStore.DAL.Migrations
                         .HasColumnType("int")
                         .HasColumnName("id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<decimal>("Balance")
                         .HasColumnType("decimal(20,2)")
@@ -419,19 +440,14 @@ namespace GameStore.DAL.Migrations
 
                     b.Property<string>("Password")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
                         .HasColumnName("password");
 
-                    b.Property<int?>("RoleId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("role_id")
-                        .HasDefaultValueSql("NULL");
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex(new[] { "RoleId" }, "role_id");
 
                     b.ToTable("user", (string)null);
                 });
@@ -476,6 +492,27 @@ namespace GameStore.DAL.Migrations
                     b.Navigation("Genre");
                 });
 
+            modelBuilder.Entity("GameStore.Domain.Models.GameMinSpecification", b =>
+                {
+                    b.HasOne("GameStore.Domain.Models.Game", "Game")
+                        .WithMany("GameMinSpecifications")
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_game_min_spec_game_id");
+
+                    b.HasOne("GameStore.Domain.Models.MinimumSpecification", "MinimumSpecification")
+                        .WithMany("GameMinSpecification")
+                        .HasForeignKey("MinimumSpecificationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_game_min_spec_min_spec_id");
+
+                    b.Navigation("Game");
+
+                    b.Navigation("MinimumSpecification");
+                });
+
             modelBuilder.Entity("GameStore.Domain.Models.GameOrder", b =>
                 {
                     b.HasOne("GameStore.Domain.Models.Game", "Game")
@@ -495,6 +532,18 @@ namespace GameStore.DAL.Migrations
                     b.Navigation("Game");
 
                     b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("GameStore.Domain.Models.Image", b =>
+                {
+                    b.HasOne("GameStore.Domain.Models.Game", "Game")
+                        .WithMany("Images")
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_image_game_id");
+
+                    b.Navigation("Game");
                 });
 
             modelBuilder.Entity("GameStore.Domain.Models.Key", b =>
@@ -518,21 +567,12 @@ namespace GameStore.DAL.Migrations
 
             modelBuilder.Entity("GameStore.Domain.Models.MinimumSpecification", b =>
                 {
-                    b.HasOne("GameStore.Domain.Models.Game", "Game")
-                        .WithMany("MinimumSpecifications")
-                        .HasForeignKey("GameId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_minimum_specification_game_id");
-
                     b.HasOne("GameStore.Domain.Models.Platform", "Platform")
                         .WithMany("MinimumSpecifications")
                         .HasForeignKey("PlatformId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_minimum_specification_platform_id");
-
-                    b.Navigation("Game");
 
                     b.Navigation("Platform");
                 });
@@ -546,17 +586,6 @@ namespace GameStore.DAL.Migrations
                         .HasConstraintName("FK_order_user_id");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("GameStore.Domain.Models.User", b =>
-                {
-                    b.HasOne("GameStore.Domain.Models.Role", "Role")
-                        .WithMany("Users")
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .HasConstraintName("FK_role_id");
-
-                    b.Navigation("Role");
                 });
 
             modelBuilder.Entity("GameStore.Domain.Models.Activation", b =>
@@ -573,16 +602,23 @@ namespace GameStore.DAL.Migrations
                 {
                     b.Navigation("GameGenres");
 
+                    b.Navigation("GameMinSpecifications");
+
                     b.Navigation("GameOrders");
 
-                    b.Navigation("Keys");
+                    b.Navigation("Images");
 
-                    b.Navigation("MinimumSpecifications");
+                    b.Navigation("Keys");
                 });
 
             modelBuilder.Entity("GameStore.Domain.Models.Genre", b =>
                 {
                     b.Navigation("GameGenres");
+                });
+
+            modelBuilder.Entity("GameStore.Domain.Models.MinimumSpecification", b =>
+                {
+                    b.Navigation("GameMinSpecification");
                 });
 
             modelBuilder.Entity("GameStore.Domain.Models.Order", b =>
@@ -598,11 +634,6 @@ namespace GameStore.DAL.Migrations
             modelBuilder.Entity("GameStore.Domain.Models.Publisher", b =>
                 {
                     b.Navigation("Games");
-                });
-
-            modelBuilder.Entity("GameStore.Domain.Models.Role", b =>
-                {
-                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("GameStore.Domain.Models.User", b =>

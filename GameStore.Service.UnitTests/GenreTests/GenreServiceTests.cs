@@ -1,7 +1,11 @@
 ﻿using AutoFixture;
 using Castle.Core.Logging;
 using GameStore.DAL.Interfaces;
+using GameStore.Domain.Enums;
 using GameStore.Domain.Models;
+using GameStore.Domain.Response;
+using GameStore.Domain.ViewModels.Genre;
+using GameStore.Service.Interfaces;
 using GameStore.Service.Services;
 using Microsoft.Extensions.Logging;
 using MockQueryable.Moq;
@@ -55,56 +59,49 @@ namespace GameStore.Service.UnitTests.GenreTests
 
             //Assert
             _genreRepositoryMock.Verify(rep => rep.GetAll(), Times.Once);
-            Assert.Equal((int)result.Status, (int)Domain.Enums.HttpStatusCode.ServerError);
+            Assert.Equal((int)HttpStatusCode.ServerError, (int)result.Status);
         }
 
-        //[Fact]
-        //public async Task GetGenres_ThrowException_ReturnEmptyListOfGenre()
-        //{
-        //    //Arrange
-        //    _genreRepositoryMock.Setup(rep => rep.GetAll()).Throws(new Exception());
-        //    var genreService = new GenreService(_loggerMock.Object, _genreRepositoryMock.Object);
+        [Fact]
+        public async Task CreateAsync_ReturnsResponseWithStatusCreated()
+        {
+            //Arrange
+            var response = new Response<bool>() { };
+            var genreView = _fixture.Create<GenreViewModel>();
+            var genre = new Genre() { Name = genreView.Name };
 
-        //    //Act
-        //    var result = await genreService.GetGenresAsync();
+            _genreRepositoryMock.Setup(rep => rep.CreateAsync(genre));
 
-        //    //Assert
-        //    _genreRepositoryMock.Verify(rep => rep.GetAll(), Times.Once);
-        //    Assert.Empty(result.Data);
-        //}
+            //var genreService = new GenreService(_loggerMock.Object, _genreRepositoryMock.Object);
+            var genreServiceMock = new Mock<GenreService>();
+            
+            genreServiceMock.Setup(x => x.CheckExistAsync(genreView, null)).ReturnsAsync(response);
 
-        //[Fact]
-        //public async Task Create_OnSuccess_ReturnTrue()
-        //{
-        //    //Arrange
-        //    var genre = _fixture.Create<Genre>();
-        //    _genreRepositoryMock.Setup(rep => rep.CreateAsync(genre));
-        //    var genreService = new GenreService(_loggerMock.Object, _genreRepositoryMock.Object);
+            //Act
+            var result = await genreServiceMock.Object.CreateGenreAsync(genreView);
 
-        //    //Act
-        //    var result = await genreService.CreateGenreAsync(genre);
+            //Assert
+            //_genreRepositoryMock.Verify(rep => rep.CreateAsync(genre), Times.Once);
+            Assert.Equal((int)HttpStatusCode.Created, (int)result.Status);
+        }
 
-        //    //Assert
-        //    _genreRepositoryMock.Verify(rep => rep.CreateAsync(genre), Times.Once);
-        //    Assert.True(result.Data);
-        //}
+        [Fact]
+        public async Task CreateAsync_TrowsException_ReturnsResponseWithStatusServerErro()
+        {
+            //Arrange
+            var genreView = _fixture.Create<GenreViewModel>();
+            var genre = new Genre() { Name = genreView.Name };
+            
+            _genreRepositoryMock.Setup(rep => rep.CreateAsync(genre)).Throws<Exception>();
+            var genreService = new GenreService(_loggerMock.Object, _genreRepositoryMock.Object);
 
-        //[Fact]
-        //public async Task Create_ThrowException_ReturnFalse()
-        //{
-        //    //Arrange
-        //    var genre = _fixture.Create<Genre>();
-        //    _genreRepositoryMock.Setup(rep => rep.CreateAsync(genre)).Throws(new Exception());
-        //    var genreService = new GenreService(_loggerMock.Object, _genreRepositoryMock.Object);
+            //Act
+            var result = await genreService.CreateGenreAsync(genreView);
 
-        //    //Act
-        //    var result = await genreService.CreateGenreAsync(genre);
-
-        //    //Assert
-        //    _genreRepositoryMock.Verify(rep => rep.CreateAsync(genre), Times.Once);
-        //    Assert.False(result.Data);
-        //}
-
+            //Assert
+            _genreRepositoryMock.Verify(rep => rep.CreateAsync(genre), Times.Once);
+            Assert.Equal((int)HttpStatusCode.ServerError, (int)result.Status);
+        }
         //[Fact]
         //public async Task Update_ThrowException_ReturnFalse()
         //{
@@ -170,40 +167,69 @@ namespace GameStore.Service.UnitTests.GenreTests
         //}
 
         //[Fact]
-        //public async Task GetById_OnSuccess_ReturnGenre()
+        //public async Task GetById_OnSuccess_ReturnsResnposeWithGenre()
         //{
         //    //Arrange
         //    const int id = 1;
-        //    var genre = _fixture.Build<Genre>().Do(g => g.Id = id).Create();
+        //    var genre = _fixture.Build<Genre>()
+        //                        .Do(g => g.Id = id)
+        //                        .Create();
 
-        //    _genreRepositoryMock.Setup(rep => rep.GetByIdAsync(id)).ReturnsAsync(genre);
+        //    var genres = _fixture.Create<List<Genre>>();
+        //    genres.Add(genre);
+
+        //    _genreRepositoryMock.Setup(rep => rep.GetAll()).Returns(genres.AsQueryable);
         //    var genreService = new GenreService(_loggerMock.Object, _genreRepositoryMock.Object);
 
         //    //Act
         //    var result = await genreService.GetGenreByIdAsync(id);
 
         //    //Assert
-        //    _genreRepositoryMock.Verify(rep => rep.GetByIdAsync(id), Times.Once);
-        //    Assert.Equal(result.Data, genre);
+        //    _genreRepositoryMock.Verify(rep => rep.GetAll(), Times.Once);
+        //    Assert.NotNull(result.Data);
         //}
 
-        //[Fact]
-        //public async Task GetById_ThrowException_ReturnNull()
-        //{
-        //    //Arrange
-        //    const int id = 1;
-        //    var genre = _fixture.Build<Genre>().Do(g => g.Id = id).Create();
+        [Fact]
+        public async Task GetGenreByIdAsync_ThrowException_ReturnsResponseWithServerError()
+        {
+            //Arrange
+            const int id = 1;
 
-        //    _genreRepositoryMock.Setup(rep => rep.GetByIdAsync(id)).Throws(new Exception());
-        //    var genreService = new GenreService(_loggerMock.Object, _genreRepositoryMock.Object);
+            _genreRepositoryMock.Setup(rep => rep.GetAll()).Throws<Exception>();
+            var genreService = new GenreService(_loggerMock.Object, _genreRepositoryMock.Object);
 
-        //    //Act
-        //    var result = await genreService.GetGenreByIdAsync(id);
+            //Act
+            var result = await genreService.GetGenreByIdAsync(id);
 
-        //    //Assert
-        //    _genreRepositoryMock.Verify(rep => rep.GetByIdAsync(id), Times.Once);
-        //    Assert.Equal(result.Data, genre);
-        //}
+            //Assert
+            _genreRepositoryMock.Verify(rep => rep.GetAll(), Times.Once);
+            Assert.Null(result.Data);
+            Assert.Equal((int)HttpStatusCode.ServerError, (int)result.Status);
+        }
 
+        [Fact]
+        public async Task GetById_GenreIsNull_ReturnsResponseWithNotFound()
+        {
+            //Arrange
+            const int id = -1;
+
+            var genres = _fixture
+                .Build<Genre>()
+                .Without(g => g.GameGenres)
+                .CreateMany(3)
+                .ToList()
+                .BuildMock();// buildmock чтобы работал asQuaeryable иначе ошибка вылетает
+
+            _genreRepositoryMock.Setup(rep => rep.GetAll()).Returns(genres.AsQueryable);
+            var genreService = new GenreService(_loggerMock.Object, _genreRepositoryMock.Object);
+
+            //Act
+            var result = await genreService.GetGenreByIdAsync(id);
+
+            //Assert
+            _genreRepositoryMock.Verify(rep => rep.GetAll(), Times.Once);
+            Assert.Null(result.Data);
+            Assert.Equal((int)HttpStatusCode.NotFound, (int)result.Status);
+        }
     }
 }

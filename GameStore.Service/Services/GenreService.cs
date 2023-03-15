@@ -20,36 +20,6 @@ public class GenreService : IGenreService
         _logger = logger;
         _genreRepository = genreRepository;
     }
-
-    public async Task<Response<bool?>> DeleteGenreAsync(int id)
-    {
-        try
-        {
-            var response = new Response<bool?>()
-            {
-                Status = HttpStatusCode.NoContent
-            };
-
-            var genre = await _genreRepository.GetAll()
-                .FirstOrDefaultAsync(x => x.Id == id);
-
-            if (genre == null)
-            {
-                response.Status = HttpStatusCode.NotFound;
-                response.Message = MessageResponse.NotFoundGenre;
-                return response;
-            }
-
-            await _genreRepository.DeleteAsync(genre);
-
-            return response;
-        }
-        catch (Exception exception)
-        {
-            var response = Catcher.CatchError<bool?, GenreService>(exception, _logger);
-            return response;
-        }
-    }
     public async Task<Response<Genre?>> GetGenreByIdAsync(int id)
     {
         try
@@ -168,6 +138,35 @@ public class GenreService : IGenreService
         catch (Exception exception)
         {
             var response = Catcher.CatchError<Genre?, GenreService>(exception, _logger);
+            return response;
+        }
+    }
+    public async Task<Response<bool?>> DeleteGenreAsync(int id)
+    {
+        try
+        {
+            var response = new Response<bool?>()
+            {
+                Status = HttpStatusCode.NoContent
+            };
+
+            var genre = await _genreRepository.GetAll()
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (genre == null)
+            {
+                response.Status = HttpStatusCode.NotFound;
+                response.Message = MessageResponse.NotFoundGenre;
+                return response;
+            }
+
+            await _genreRepository.DeleteAsync(genre);
+
+            return response;
+        }
+        catch (Exception exception)
+        {
+            var response = Catcher.CatchError<bool?, GenreService>(exception, _logger);
             return response;
         }
     }

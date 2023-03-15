@@ -5,6 +5,6 @@
     {
         Administrator = 1,
         Moderator = 2,
-        User = 4
+        User = 3
     }
 }

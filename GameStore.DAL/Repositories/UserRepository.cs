@@ -34,11 +34,11 @@ namespace GameStore.DAL.Repositories
             return _db.Users;
         }
 
-        public async Task<User?> GetByIdAsync(int id)
-        {
-            var user = await _db.Users.FirstOrDefaultAsync(user => user.Id == id);
-            return user;
-        }
+        // public async Task<User?> GetByIdAsync(int id)
+        // {
+        //     var user = await _db.Users.FirstOrDefaultAsync(user => user.Id == id);
+        //     return user;
+        // }
 
         public async Task UpdateAsync(User model)
         {

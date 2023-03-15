@@ -7,8 +7,9 @@ namespace GameStore.Domain.Models
         public Game()
         {
             GameGenres = new HashSet<GameGenre>();
+            GameMinSpecifications = new HashSet<GameMinSpecification>();
             Keys = new HashSet<Key>();
-            MinimumSpecifications = new HashSet<MinimumSpecification>();
+            Images = new HashSet<Image>();
         }
 
         public int Id { get; set; }
@@ -23,10 +24,10 @@ namespace GameStore.Domain.Models
 
         public virtual Developer Developer { get; set; }
         public virtual Publisher Publisher { get; set; }
+        public virtual ICollection<GameMinSpecification> GameMinSpecifications { get; set; }
         public virtual ICollection<GameGenre> GameGenres { get; set; }
         public virtual ICollection<Key> Keys { get; set; }
-        public virtual ICollection<MinimumSpecification> MinimumSpecifications { get; set; }
-        
         public virtual ICollection<GameOrder> GameOrders { get; set; }
+        public virtual ICollection<Image> Images { get; set; }
     }
 }

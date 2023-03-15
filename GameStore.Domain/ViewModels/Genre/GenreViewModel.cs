@@ -10,7 +10,7 @@ namespace GameStore.Domain.ViewModels.Genre
     public class GenreViewModel
     {
         [Required(ErrorMessage = "Введите название")]
-        [StringLength(50, MinimumLength = 1, ErrorMessage = "Длина жанра должна быть от 1 до 50 символов")]
+        [StringLength(50, MinimumLength = 1, ErrorMessage = "Количество символов должно быть от 1 до 50")]
         public string? Name { get; set; }
     }
 }
