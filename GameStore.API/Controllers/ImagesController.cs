@@ -29,15 +29,7 @@ public class ImagesController: ControllerBase
     {
         try
         {
-            var fullPath = Request.Scheme + "://" + Request.Host + Request.Path;
-            //var response = await _imageService.GetImagesAsync();
-            var response = new Response<List<string>>()
-            {
-                Data = new List<string>(){ $"{fullPath}123.jpg", $"{fullPath}12.jpg" },
-                Message = "Successful",
-                Status = HttpStatusCode.Ok
-            };
-            
+            var response = await _imageService.GetImagesAsync();
             return Ok(response);
         }
         catch (Exception exception) 
@@ -47,102 +39,66 @@ public class ImagesController: ControllerBase
         }
     }
 
-    [HttpGet("{gameId}/{nameImage}")]
-    public async Task<IActionResult> GetImageById(int gameId, string nameImage)
+    [HttpGet("images/{gameId:int}/{fileName}")]
+    public async Task<IActionResult> GetAvatarImage(int gameId, string fileName)
+    {
+        try
+        {
+            var fullPath = Path.Combine(GetPathToGameImage(gameId), fileName);
+            if (!System.IO.File.Exists(fullPath))
+            {
+                return NotFound();
+            }
+            
+            return PhysicalFile(fullPath, "image/jpg");
+        }
+        catch (Exception exception)
+        {
+            var response = Catcher.CatchError<string?, ImagesController>(exception, _logger);
+            return StatusCode((int)response.Status, response);
+        }
+    }
+
+    private async Task<bool> SaveGameImage(int id, string fileName, IFormFile image)
+    {
+        try
+        {
+            var path = GetPathToGameImage(id);
+            if (!Directory.Exists(path))
+            { 
+                Directory.CreateDirectory(path);
+            }
+            
+            var fullPath = Path.Combine(path, fileName); 
+            await using var stream = new FileStream(fullPath, FileMode.Create);
+            await image.CopyToAsync(stream);
+
+            return true;
+        }
+        catch 
+        {
+            return false;
+        }
+    }
+
+    private async Task<bool> DeleteGameImage(int id, string fileName)
         {
             try
             {
-                var pathImage = _environment.WebRootPath + @"\img\1\" + nameImage;
-                
-                // var response = await _imageService.GetImageByIdAsync(id);
-                // if ((int)response.Status >= 300)
-                // {
-                //     return StatusCode((int)response.Status, response);
-                // }
-                
-                return PhysicalFile(pathImage, "image/jpg");
+                var fullPath = Path.Combine(GetPathToGameImage(id), fileName);
+                if (System.IO.File.Exists(fullPath))
+                {
+                    System.IO.File.Delete(fullPath);
+                }
+
+                return true;
             }
-            catch (Exception exception)
+            catch
             {
-                var response = Catcher.CatchError<Image?, ImagesController>(exception, _logger);
-                return StatusCode((int)response.Status, response);
+                return false;
             }
         }
 
-        // [HttpDelete("{id}")]
-        // public async Task<IActionResult> DeleteDeveloper(int id)
-        // {
-        //     try
-        //     {
-        //         var response = await _developerService.DeleteDeveloperAsync(id);
-        //         if ((int)response.Status >= 300)
-        //         {
-        //             return StatusCode((int)response.Status, response);
-        //         }
-        //
-        //         return NoContent();
-        //     }
-        //     catch (Exception exception)
-        //     {
-        //         var response = Catcher.CatchError<bool?, DevelopersController>(exception, _logger);
-        //         return StatusCode((int)response.Status, response);
-        //     }
-        // }
-        //
-        // [HttpPost]
-        // public async Task<IActionResult> CreateDeveloper([FromBody] DeveloperViewModel developerView)
-        // {
-        //     try
-        //     {
-        //         if (!ModelState.IsValid)
-        //         {
-        //             var errors = ModelState.AllErrors();
-        //             return BadRequest(new { Message = MessageResponse.Invalid, Errors = errors });
-        //         }
-        //
-        //         var response = await _developerService.CreateDeveloperAsync(developerView);
-        //         if ((int)response.Status >= 300)
-        //         {
-        //             return StatusCode((int)response.Status, response);
-        //         }
-        //
-        //         return CreatedAtAction(nameof(GetDeveloperById), new { id = response.Data?.Id }, response);
-        //     }
-        //     catch (Exception exception)
-        //     {
-        //         var response = Catcher.CatchError<bool?, DevelopersController>(exception, _logger);
-        //         return StatusCode((int)response.Status, response);
-        //     }
-        // }
-        //
-        // [HttpPut("{id}")]
-        // public async Task<IActionResult> UpdateDeveloper(int id, [FromBody] DeveloperViewModel developerView)
-        // {
-        //     try
-        //     {
-        //         if (id <= 0)
-        //         {
-        //             return BadRequest(MessageResponse.IncorrectId);
-        //         }
-        //
-        //         if (!ModelState.IsValid)
-        //         {
-        //             var errors = ModelState.AllErrors();
-        //             return BadRequest(new { Message = MessageResponse.Invalid, Errors = errors });
-        //         }
-        //
-        //         var response = await _developerService.UpdateDeveloperAsync(id, developerView);
-        //         if ((int)response.Status >= 300)
-        //         {
-        //             return StatusCode((int)response.Status, response);
-        //         }
-        //
-        //         return NoContent();
-        //     }
-        //     catch (Exception exception)
-        //     {
-        //         var response = Catcher.CatchError<Developer?, DevelopersController>(exception, _logger);
-        //         return StatusCode((int)response.Status, response);
-        //     }
-        // }
+    private string GetPathToGameImage(int id) => 
+        Path.Combine(_environment.WebRootPath, "images", $"{id}");
 }

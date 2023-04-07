@@ -12,6 +12,8 @@ using Microsoft.OpenApi.Models;
 using NLog.Web;
 using System.Security.Claims;
 using System.Text.Json.Serialization;
+using GameStore.Service;
+using GameStore.API;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,8 +24,11 @@ builder.Services.AddControllers()
     })
     .AddJsonOptions(options =>
     {
-        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull; 
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+        options.JsonSerializerOptions.Converters.Add(new DateTimeConverter());
     });
+
 
 builder.Logging.ClearProviders();
 builder.Host.UseNLog();
@@ -36,6 +41,9 @@ builder.Services.AddScoped<IDeveloperService, DeveloperService>();
 builder.Services.AddScoped<IPublisherService, PublisherService>();
 builder.Services.AddScoped<IMinSpecificationService, MinSpecificationService>();
 builder.Services.AddScoped<IImageService, ImageService>();
+builder.Services.AddScoped<IPlatformService, PlatformService>();
+builder.Services.AddScoped<IActivationService, ActivationService>();
+builder.Services.AddScoped<IGameService, GameService>();
 #endregion
 
 #region Services for add to scope repository
@@ -45,7 +53,9 @@ builder.Services.AddScoped<IRepository<Developer>, DeveloperRepository>();
 builder.Services.AddScoped<IRepository<Publisher>, PublisherRepository>();
 builder.Services.AddScoped<IRepository<MinimumSpecification>, MinSpecificationRepository>();
 builder.Services.AddScoped<IRepository<Image>, ImageRepository>();
-
+builder.Services.AddScoped<IRepository<Platform>, PlatformRepository>();
+builder.Services.AddScoped<IRepository<Activation>, ActivationRepository>();
+builder.Services.AddScoped<IRepository<Game>, GameRepository>();
 #endregion
 
 builder.Services.AddDbContext<GamestoredbContext>();
@@ -79,6 +89,7 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 builder.Services.AddCors();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

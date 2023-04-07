@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using GameStore.Domain.Models;
 
 namespace GameStore.Domain.ViewModels.Order;
 
@@ -14,5 +13,5 @@ public class OrderViewModel
     public decimal? Amount { get; set; }
     
     [Required(ErrorMessage = "В заказе должны быть игры")]
-    public List<Game>? Games { get; set; }
+    public List<Domain.Models.Game>? Games { get; set; }
 }

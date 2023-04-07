@@ -1,17 +1,18 @@
 ﻿
-using GameStore.Domain.Enums;
+using GameStore.Domain.Dto.Image;
 using GameStore.Domain.Models;
 using GameStore.Domain.Response;
-using GameStore.Domain.ViewModels.Account;
+using GameStore.Domain.ViewModels.Image;
 
 namespace GameStore.Service.Interfaces
 {
     public interface IImageService
     {
-        public Task<Response<List<Image>?>> GetImagesAsync();
-        public Task<Response<Image?>> GetImageByIdAsync(int id);
-        public Task<Response<Image?>> CreateImageAsync(Image image);
-        public Task<Response<Image?>> UpdateImageAsync(Image image);
+        public Task<Response<List<ImageDto>?>> GetImagesAsync();
+        public Task<Response<ImageDto?>> GetImageByIdAsync(int id);
+        public Task<Response<ImageDto?>> CreateImageAsync(ImageViewModel imageViewModel);
+        public Task<Response<ImageDto?>> UpdateImageAsync(int id, ImageViewModel imageViewModel);
         public Task<Response<bool?>> DeleteImageAsync(int id);
+        public Task<Response<bool>> CheckExistAsync(ImageViewModel imageViewModelView, int id);
     }
 }

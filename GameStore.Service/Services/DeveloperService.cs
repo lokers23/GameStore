@@ -1,5 +1,7 @@
-﻿using GameStore.DAL.Interfaces;
+﻿using AutoMapper;
+using GameStore.DAL.Interfaces;
 using GameStore.Domain.Constants;
+using GameStore.Domain.Dto.Publisher;
 using GameStore.Domain.Enums;
 using GameStore.Domain.Helpers;
 using GameStore.Domain.Models;
@@ -14,69 +16,66 @@ namespace GameStore.Service.Services
     public class DeveloperService : IDeveloperService
     {
         private readonly IRepository<Developer> _developerRepository;
+        private readonly IMapper _mapper;
         private readonly ILogger<DeveloperService> _logger;
-        public DeveloperService(ILogger<DeveloperService> logger, IRepository<Developer> genreRepository)
+        public DeveloperService(ILogger<DeveloperService> logger, IRepository<Developer> genreRepository,
+            IMapper mapper)
         {
             _logger = logger;
             _developerRepository = genreRepository;
+            _mapper = mapper;
         }
-        public async Task<Response<List<Developer>?>> GetDevelopersAsync()
+        public async Task<Response<List<DeveloperDto>?>> GetDevelopersAsync()
         {
             try
             {
-                var response = new Response<List<Developer>?>()
-                {
-                    Status = HttpStatusCode.Ok
-                };
-
-                var developer = await _developerRepository.GetAll().ToListAsync();
-                response.Data = developer;
-
+                var response = new Response<List<DeveloperDto>?>();
+                var developers = await _developerRepository.GetAll()
+                    .Select(developer => _mapper.Map<DeveloperDto>(developer))
+                    .ToListAsync();
+                
+                response.Data = developers;
+                response.Status = HttpStatusCode.Ok;
                 return response;
             }
             catch (Exception exception)
             {
-                var response = Catcher.CatchError<List<Developer>?, DeveloperService>(exception, _logger);
+                var response = Catcher.CatchError<List<DeveloperDto>?, DeveloperService>(exception, _logger);
                 return response;
             }
         }
-        public async Task<Response<Developer?>> GetDeveloperByIdAsync(int id)
+        public async Task<Response<DeveloperDto?>> GetDeveloperByIdAsync(int id)
         {
             try
             {
-                var response = new Response<Developer?>()
-                {
-                    Status = HttpStatusCode.Ok
-                };
-
+                var response = new Response<DeveloperDto?>();
                 var developer = await _developerRepository.GetAll()
                     .FirstOrDefaultAsync(x => x.Id == id);
 
                 if (developer == null)
                 {
                     response.Status = HttpStatusCode.NotFound;
-                    response.Message = MessageResponse.NotFoundGenre;
+                    response.Message = MessageResponse.NotFoundEntity;
                     return response;
                 }
 
-                response.Data = developer;
-
+                response.Data = _mapper.Map<DeveloperDto>(developer);
+                response.Status = HttpStatusCode.Ok;
                 return response;
             }
             catch (Exception exception)
             {
-                var response = Catcher.CatchError<Developer?, DeveloperService>(exception, _logger);
+                var response = Catcher.CatchError<DeveloperDto?, DeveloperService>(exception, _logger);
                 return response;
             }
         }
-        public async Task<Response<Developer?>> CreateDeveloperAsync(DeveloperViewModel developerView)
+        public async Task<Response<DeveloperDto?>> CreateDeveloperAsync(DeveloperViewModel developerView)
         {
             try
             {
-                var response = new Response<Developer?>();
-
+                var response = new Response<DeveloperDto?>();
                 var responseExist = await CheckExistAsync(developerView);
-                if (responseExist.Data == true)
+                if (responseExist.Data)
                 {
                     response.Errors = responseExist.Errors;
                     response.Status = responseExist.Status;
@@ -85,59 +84,53 @@ namespace GameStore.Service.Services
                     return response;
                 }
 
-                var developer = new Developer()
-                {
-                    Name = developerView.Name
-                };
-
+                var developer = _mapper.Map<Developer>(developerView);
                 await _developerRepository.CreateAsync(developer);
+                
                 response.Status = HttpStatusCode.Created;
-                response.Message = MessageResponse.SuccessCreatedGenre;
-                response.Data = developer;
-
+                response.Data = _mapper.Map<DeveloperDto>(developer);
                 return response;
             }
             catch (Exception exception)
             {
-                var response = Catcher.CatchError<Developer?, DeveloperService>(exception, _logger);
+                var response = Catcher.CatchError<DeveloperDto?, DeveloperService>(exception, _logger);
                 return response;
             }
         }
-        public async Task<Response<Developer?>> UpdateDeveloperAsync(int id, DeveloperViewModel developerView)
+        public async Task<Response<DeveloperDto?>> UpdateDeveloperAsync(int id, DeveloperViewModel developerView)
         {
             try
             {
-                var response = new Response<Developer?>();
+                var response = new Response<DeveloperDto?>();
                 var developer = await _developerRepository.GetAll()
                     .FirstOrDefaultAsync(x => x.Id == id);
 
                 if (developer == null)
                 {
                     response.Status = HttpStatusCode.NotFound;
-                    response.Message = MessageResponse.NotFoundGenre;
+                    response.Message = MessageResponse.NotFoundEntity;
                     return response;
                 }
 
-                var responseExist = await CheckExistAsync(developerView, developer);
-                if (responseExist.Data == true)
+                var responseExist = await CheckExistAsync(developerView, id);
+                if (responseExist.Data)
                 {
                     response.Errors = responseExist.Errors;
                     response.Status = responseExist.Status;
                     response.Message = responseExist.Message;
-
                     return response;
                 }
 
                 developer.Name = developerView.Name;
                 await _developerRepository.UpdateAsync(developer);
-                response.Data = developer;
+                
+                response.Data = _mapper.Map<DeveloperDto>(developer);
                 response.Status = HttpStatusCode.NoContent;
-
                 return response;
             }
             catch (Exception exception)
             {
-                var response = Catcher.CatchError<Developer?, DeveloperService>(exception, _logger);
+                var response = Catcher.CatchError<DeveloperDto?, DeveloperService>(exception, _logger);
                 return response;
             }
         }
@@ -145,11 +138,7 @@ namespace GameStore.Service.Services
         {
             try
             {
-                var response = new Response<bool?>()
-                {
-                    Status = HttpStatusCode.NoContent
-                };
-
+                var response = new Response<bool?>();
                 var developer = await _developerRepository.GetAll()
                     .FirstOrDefaultAsync(x => x.Id == id);
 
@@ -162,6 +151,7 @@ namespace GameStore.Service.Services
 
                 await _developerRepository.DeleteAsync(developer);
 
+                response.Status = HttpStatusCode.NoContent;
                 return response;
             }
             catch (Exception exception)
@@ -170,7 +160,7 @@ namespace GameStore.Service.Services
                 return response;
             }
         }
-        public async Task<Response<bool>> CheckExistAsync(DeveloperViewModel developerView, Developer? developerDb = null)
+        public async Task<Response<bool>> CheckExistAsync(DeveloperViewModel developerView, int id = 0)
         {
             var response = new Response<bool>()
             {
@@ -178,38 +168,18 @@ namespace GameStore.Service.Services
                 Errors = new Dictionary<string, string[]>()
             };
 
-            bool isExistByName;
-            if (developerDb == null)
-            {
-                isExistByName = await IsExistByNameAsync(developerView.Name);
-            }
-            else
-            {
-                isExistByName = await IsExistByNameAsync(developerView.Name, developerDb.Name);
-            }
-
-            if (isExistByName)
+            var isExist = await _developerRepository.GetAll().AnyAsync(m => 
+                m.Id != id &&
+                m.Name.Equals(developerView.Name));
+        
+            if (isExist)
             {
                 response.Status = HttpStatusCode.Conflict;
                 response.Data = true;
-                response.Errors.Add(developerView.Name, new[] { MessageError.EntityNameExist });
+                response.Errors.Add(nameof(Developer), new[] { MessageError.EntityExists });
             }
 
             return response;
-        }
-        private async Task<bool> IsExistByNameAsync(string name)
-        {
-            return await _developerRepository.GetAll()
-            .AnyAsync(x => x.Name.Equals(name));
-        }
-        private async Task<bool> IsExistByNameAsync(string name, string nameDb)
-        {
-            if (name.Equals(nameDb))
-            {
-                return false;
-            }
-
-            return await IsExistByNameAsync(name);
         }
     }
 }

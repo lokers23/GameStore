@@ -6,7 +6,8 @@ namespace GameStore.Domain.Models
     {
         public Order()
         {
-            GameOrders = new HashSet<GameOrder>();
+            //GameOrders = new HashSet<GameOrder>();
+            KeyOrders = new HashSet<KeyOrder>();
         }
 
         public int Id { get; set; }
@@ -15,6 +16,7 @@ namespace GameStore.Domain.Models
         public int? UserId { get; set; }
 
         public virtual User User { get; set; }
-        public virtual ICollection<GameOrder> GameOrders { get; set; }
+        //public virtual ICollection<GameOrder> GameOrders { get; set; }
+        public virtual ICollection<KeyOrder> KeyOrders { get; set; }
     }
 }

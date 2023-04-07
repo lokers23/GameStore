@@ -20,14 +20,14 @@ namespace GameStore.Domain.Models
         public string Description { get; set; }
         public decimal Price { get; set; }
         public string VideoUrl { get; set; }
-        public string AvatarPath { get; set; }
+        public string AvatarName { get; set; }
 
         public virtual Developer Developer { get; set; }
         public virtual Publisher Publisher { get; set; }
         public virtual ICollection<GameMinSpecification> GameMinSpecifications { get; set; }
         public virtual ICollection<GameGenre> GameGenres { get; set; }
         public virtual ICollection<Key> Keys { get; set; }
-        public virtual ICollection<GameOrder> GameOrders { get; set; }
+        //public virtual ICollection<GameOrder> GameOrders { get; set; }
         public virtual ICollection<Image> Images { get; set; }
     }
 }

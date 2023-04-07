@@ -2,6 +2,7 @@
 {
     public static class MessageResponse
     {
+        public const string NotFoundEntity = "Такой записи не существует";
         public const string NotFoundGenre = "Такого жанра не существует";
         public const string IncorrectId = "Некорректный id";
         public const string Invalid = "Ошибка валидации";

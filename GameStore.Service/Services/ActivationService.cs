@@ -1,5 +1,7 @@
-﻿using GameStore.DAL.Interfaces;
+﻿using AutoMapper;
+using GameStore.DAL.Interfaces;
 using GameStore.Domain.Constants;
+using GameStore.Domain.Dto.Publisher;
 using GameStore.Domain.Enums;
 using GameStore.Domain.Helpers;
 using GameStore.Domain.Models;
@@ -15,42 +17,39 @@ namespace GameStore.Service.Services;
 public class ActivationService: IActivationService
 {
     private readonly IRepository<Activation> _activationRepository;
+    private readonly IMapper _mapper;
     private readonly ILogger<ActivationService> _logger;
-    public ActivationService(ILogger<ActivationService> logger, IRepository<Activation> activationRepository)
+    public ActivationService(ILogger<ActivationService> logger, IRepository<Activation> activationRepository, 
+        IMapper mapper)
     {
         _logger = logger;
         _activationRepository = activationRepository;
+        _mapper = mapper;
     }
-    public async Task<Response<List<Activation>?>> GetActivationsAsync()
+    public async Task<Response<List<ActivationDto>?>> GetActivationsAsync()
     {
         try
         {
-            var response = new Response<List<Activation>?>()
-            {
-                Status = HttpStatusCode.Ok
-            };
-
-            var genre = await _activationRepository.GetAll().ToListAsync();
-            response.Data = genre;
-
+            var response = new Response<List<ActivationDto>?>();
+            var activations = await _activationRepository.GetAll()
+                .Select(activation => _mapper.Map<ActivationDto>(activation))
+                .ToListAsync();
+            
+            response.Data = activations;
+            response.Status = HttpStatusCode.Ok;
             return response;
         }
         catch (Exception exception)
         {
-            var response = Catcher.CatchError<List<Activation>?, ActivationService>(exception, _logger);
+            var response = Catcher.CatchError<List<ActivationDto>?, ActivationService>(exception, _logger);
             return response;
         }
     }
-
-    public async Task<Response<Activation?>> GetActivationByIdAsync(int id)
+    public async Task<Response<ActivationDto?>> GetActivationByIdAsync(int id)
     {
         try
         {
-            var response = new Response<Activation?>()
-            {
-                Status = HttpStatusCode.Ok
-            };
-
+            var response = new Response<ActivationDto?>();
             var activation = await _activationRepository.GetAll()
                 .FirstOrDefaultAsync(x => x.Id == id);
 
@@ -61,99 +60,86 @@ public class ActivationService: IActivationService
                 return response;
             }
 
-            response.Data = activation;
-
+            response.Data = _mapper.Map<ActivationDto>(activation);
+            response.Status = HttpStatusCode.Ok;
             return response;
         }
         catch (Exception exception)
         {
-            var response = Catcher.CatchError<Activation?, ActivationService>(exception, _logger);
+            var response = Catcher.CatchError<ActivationDto?, ActivationService>(exception, _logger);
             return response;
         }
     }
-    
-    public async Task<Response<Activation?>> CreateActivationAsync(ActivationViewModel activationView)
+    public async Task<Response<ActivationDto?>> CreateActivationAsync(ActivationViewModel activationView)
     {
         try
         {
-            var response = new Response<Activation?>();
-
+            var response = new Response<ActivationDto?>();
             var responseExist = await CheckExistAsync(activationView);
-            if (responseExist.Data == true)
+            if (responseExist.Data)
             {
                 response.Errors = responseExist.Errors;
                 response.Status = responseExist.Status;
                 response.Message = responseExist.Message;
-
                 return response;
             }
 
-            var activation = new Activation()
-            {
-                Name = activationView.Name
-            };
-
+            var activation = _mapper.Map<Activation>(activationView);
             await _activationRepository.CreateAsync(activation);
+            
             response.Status = HttpStatusCode.Created;
             response.Message = MessageResponse.SuccessCreatedGenre;
-            response.Data = activation;
-
+            response.Data = _mapper.Map<ActivationDto>(activation);
             return response;
         }
         catch (Exception exception)
         {
-            var response = Catcher.CatchError<Activation?, ActivationService>(exception, _logger);
+            var response = Catcher.CatchError<ActivationDto?, ActivationService>(exception, _logger);
             return response;
         }
     }
-
-    public async Task<Response<Activation?>> UpdateActivationAsync(int id, ActivationViewModel activationView)
+    public async Task<Response<ActivationDto?>> UpdateActivationAsync(int id, ActivationViewModel activationView)
     {
         try
         {
-            var response = new Response<Activation?>();
+            var response = new Response<ActivationDto?>();
             var activation = await _activationRepository.GetAll()
                 .FirstOrDefaultAsync(x => x.Id == id);
 
             if (activation == null)
             {
                 response.Status = HttpStatusCode.NotFound;
-                response.Message = MessageResponse.NotFoundGenre;
+                response.Message = MessageResponse.NotFoundEntity;
                 return response;
             }
 
-            var responseExist = await CheckExistAsync(activationView, activation);
-            if (responseExist.Data == true)
+            var responseExist = await CheckExistAsync(activationView, id);
+            if (responseExist.Data)
             {
                 response.Errors = responseExist.Errors;
                 response.Status = responseExist.Status;
                 response.Message = responseExist.Message;
-
                 return response;
             }
 
             activation.Name = activationView.Name;
             await _activationRepository.UpdateAsync(activation);
-            response.Data = activation;
+            
+            response.Data = _mapper.Map<ActivationDto>(activation);
             response.Status = HttpStatusCode.NoContent;
-
             return response;
         }
         catch (Exception exception)
         {
-            var response = Catcher.CatchError<Activation?, ActivationService>(exception, _logger);
+            var response = Catcher.CatchError<ActivationDto?, ActivationService>(exception, _logger);
             return response;
         }
     }
-    
     public async Task<Response<bool?>> DeleteActivationAsync(int id)
     {
         try
         {
-            var response = new Response<bool?>()
-            {
-                Status = HttpStatusCode.NoContent
-            };
+            var response = new Response<bool?>();
 
             var activation = await _activationRepository.GetAll()
                 .FirstOrDefaultAsync(x => x.Id == id);
@@ -167,6 +153,7 @@ public class ActivationService: IActivationService
 
             await _activationRepository.DeleteAsync(activation);
 
+            response.Status = HttpStatusCode.NoContent;
             return response;
         }
         catch (Exception exception)
@@ -175,8 +162,7 @@ public class ActivationService: IActivationService
             return response;
         }
     }
-
-    public async Task<Response<bool>> CheckExistAsync(ActivationViewModel activationView, Activation? activationDb = null)
+    public async Task<Response<bool>> CheckExistAsync(ActivationViewModel activationView, int id = 0)
     {
         var response = new Response<bool>()
         {
@@ -184,37 +170,17 @@ public class ActivationService: IActivationService
             Errors = new Dictionary<string, string[]>()
         };
 
-        bool isExistByName;
-        if (activationDb == null)
-        {
-            isExistByName = await IsExistByNameAsync(activationView.Name);
-        }
-        else
-        {
-            isExistByName = await IsExistByNameAsync(activationView.Name, activationDb.Name);
-        }
-
-        if (isExistByName)
+        var isExist = await _activationRepository.GetAll().AnyAsync(m => 
+            m.Id != id &&
+            m.Name.Equals(activationView.Name));
+        
+        if (isExist)
         {
             response.Status = HttpStatusCode.Conflict;
             response.Data = true;
-            response.Errors.Add(activationView.Name, new[] { MessageError.EntityNameExist });
+            response.Errors.Add(nameof(Activation), new[] { MessageError.EntityExists });
         }
 
         return response;
-    }
-    private async Task<bool> IsExistByNameAsync(string name)
-    {
-        return await _activationRepository.GetAll()
-            .AnyAsync(x => x.Name.Equals(name));
-    }
-    private async Task<bool> IsExistByNameAsync(string name, string nameDb)
-    {
-        if (name.Equals(nameDb))
-        {
-            return false;
-        }
-
-        return await IsExistByNameAsync(name);
     }
 }

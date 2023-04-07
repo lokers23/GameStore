@@ -1,5 +1,6 @@
 ﻿using GameStore.DAL.Interfaces;
 using GameStore.Domain.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace GameStore.DAL.Repositories;
 

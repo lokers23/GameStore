@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+
 namespace GameStore.Domain.ViewModels.MinimumSpecification;
 
 public class MinSpecificationViewModel

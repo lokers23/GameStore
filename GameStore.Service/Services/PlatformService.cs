@@ -1,12 +1,13 @@
-﻿using GameStore.DAL.Interfaces;
+﻿using AutoMapper;
+using GameStore.DAL.Interfaces;
 using GameStore.DAL.Repositories;
 using GameStore.Domain.Constants;
+using GameStore.Domain.Dto.Platform;
 using GameStore.Domain.Enums;
 using GameStore.Domain.Helpers;
 using GameStore.Domain.Models;
 using GameStore.Domain.Response;
 using GameStore.Domain.ViewModels.Platform;
-using GameStore.Domain.ViewModels.Publisher;
 using GameStore.Service.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -16,39 +17,41 @@ namespace GameStore.Service.Services
     public class PlatformService : IPlatformService
     {
         private readonly IRepository<Platform> _platformRepository;
+        private readonly IMapper _mapper;
         private readonly ILogger<PlatformService> _logger;
-        public PlatformService(ILogger<PlatformService> logger, IRepository<Platform> platformRepository)
+        public PlatformService(ILogger<PlatformService> logger, IRepository<Platform> platformRepository, IMapper mapper)
         {
             _logger = logger;
             _platformRepository = platformRepository;
+            _mapper = mapper;
         }
-        public async Task<Response<List<Platform>?>> GetPlatformsAsync()
+        public async Task<Response<List<PlatformDto>?>> GetPlatformsAsync()
         {
             try
             {
-                var response = new Response<List<Platform>?>()
-                {
-                    Status = HttpStatusCode.Ok
-                };
+                var response = new Response<List<PlatformDto>?>();
+                var platforms = await _platformRepository.GetAll()
+                    .Select(p => _mapper.Map<PlatformDto>(p))
+                    .ToListAsync();
 
-                var platforms = await _platformRepository.GetAll().ToListAsync();
+                response.Status = HttpStatusCode.Ok;
                 response.Data = platforms;
 
                 return response;
             }
             catch (Exception exception)
             {
-                var response = Catcher.CatchError<List<Platform>?, PlatformService>(exception, _logger);
+                var response = Catcher.CatchError<List<PlatformDto>?, PlatformService>(exception, _logger);
                 return response;
             }
         }
-        public async Task<Response<Platform?>> GetPlatformByIdAsync(int id)
+        public async Task<Response<PlatformDto?>> GetPlatformByIdAsync(int id)
         {
             try
             {
-                var response = new Response<Platform?>()
+                var response = new Response<PlatformDto?>()
                 {
-                    Status = HttpStatusCode.Ok
+                    
                 };
 
                 var platform = await _platformRepository.GetAll()
@@ -61,25 +64,25 @@ namespace GameStore.Service.Services
                     return response;
                 }
 
-                response.Data = platform;
+                response.Status = HttpStatusCode.Ok;
+                response.Data = _mapper.Map<PlatformDto>(platform);
 
                 return response;
             }
             catch (Exception exception)
             {
-                var response = Catcher.CatchError<Platform?, PlatformService>(exception, _logger);
+                var response = Catcher.CatchError<PlatformDto?, PlatformService>(exception, _logger);
                 return response;
             }
         }
-
-        public async Task<Response<Platform?>> CreatePlatformAsync(PlatformViewModel platformView)
+        public async Task<Response<PlatformDto?>> CreatePlatformAsync(PlatformViewModel platformView)
         {
             try
             {
-                var response = new Response<Platform?>();
-
+                var response = new Response<PlatformDto?>();
                 var responseExist = await CheckExistAsync(platformView);
-                if (responseExist.Data == true)
+                
+                if (responseExist.Data)
                 {
                     response.Errors = responseExist.Errors;
                     response.Status = responseExist.Status;
@@ -88,29 +91,26 @@ namespace GameStore.Service.Services
                     return response;
                 }
 
-                var platform = new Platform()
-                {
-                    Name = platformView.Name
-                };
-
+                var platform = _mapper.Map<Platform>(platformView);
                 await _platformRepository.CreateAsync(platform);
+                
                 response.Status = HttpStatusCode.Created;
                 response.Message = MessageResponse.SuccessCreatedGenre;
-                response.Data = platform;
+                response.Data = _mapper.Map<PlatformDto>(platform);
 
                 return response;
             }
             catch (Exception exception)
             {
-                var response = Catcher.CatchError<Platform?, PlatformService>(exception, _logger);
+                var response = Catcher.CatchError<PlatformDto?, PlatformService>(exception, _logger);
                 return response;
             }
         }
-        public async Task<Response<Platform?>> UpdatePlatformAsync(int id, PlatformViewModel platformView)
+        public async Task<Response<PlatformDto?>> UpdatePlatformAsync(int id, PlatformViewModel platformView)
         {
             try
             {
-                var response = new Response<Platform?>();
+                var response = new Response<PlatformDto?>();
                 var platform = await _platformRepository.GetAll()
                     .FirstOrDefaultAsync(x => x.Id == id);
 
@@ -121,8 +121,8 @@ namespace GameStore.Service.Services
                     return response;
                 }
 
-                var responseExist = await CheckExistAsync(platformView, platform);
-                if (responseExist.Data == true)
+                var responseExist = await CheckExistAsync(platformView, id);
+                if (responseExist.Data)
                 {
                     response.Errors = responseExist.Errors;
                     response.Status = responseExist.Status;
@@ -133,26 +133,22 @@ namespace GameStore.Service.Services
 
                 platform.Name = platformView.Name;
                 await _platformRepository.UpdateAsync(platform);
-                response.Data = platform;
+                
+                response.Data = _mapper.Map<PlatformDto>(platform);
                 response.Status = HttpStatusCode.NoContent;
-
                 return response;
             }
             catch (Exception exception)
             {
-                var response = Catcher.CatchError<Platform?, PlatformService>(exception, _logger);
+                var response = Catcher.CatchError<PlatformDto?, PlatformService>(exception, _logger);
                 return response;
             }
         }
-
         public async Task<Response<bool?>> DeletePlatformAsync(int id)
         {
             try
             {
-                var response = new Response<bool?>()
-                {
-                    Status = HttpStatusCode.NoContent
-                };
+                var response = new Response<bool?>();
 
                 var platform = await _platformRepository.GetAll()
                     .FirstOrDefaultAsync(x => x.Id == id);
@@ -166,6 +162,7 @@ namespace GameStore.Service.Services
 
                 await _platformRepository.DeleteAsync(platform);
 
+                response.Status = HttpStatusCode.NoContent;
                 return response;
             }
             catch (Exception exception)
@@ -174,8 +171,7 @@ namespace GameStore.Service.Services
                 return response;
             }
         }
-
-        public async Task<Response<bool>> CheckExistAsync(PlatformViewModel platformView, Platform? platformDb = null)
+        public async Task<Response<bool>> CheckExistAsync(PlatformViewModel platformView, int id = 0)
         {
             var response = new Response<bool>()
             {
@@ -183,38 +179,18 @@ namespace GameStore.Service.Services
                 Errors = new Dictionary<string, string[]>()
             };
 
-            bool isExistByName;
-            if (platformDb == null)
-            {
-                isExistByName = await IsExistByNameAsync(platformView.Name);
-            }
-            else
-            {
-                isExistByName = await IsExistByNameAsync(platformView.Name, platformDb.Name);
-            }
-
-            if (isExistByName)
+            var isExist = await _platformRepository.GetAll().AnyAsync(m => 
+                m.Id != id &&
+                m.Name.Equals(platformView.Name));
+        
+            if (isExist)
             {
                 response.Status = HttpStatusCode.Conflict;
                 response.Data = true;
-                response.Errors.Add(platformView.Name, new[] { MessageError.EntityNameExist });
+                response.Errors.Add(nameof(Platform), new[] { MessageError.EntityExists });
             }
 
             return response;
-        }
-        private async Task<bool> IsExistByNameAsync(string name)
-        {
-            return await _platformRepository.GetAll()
-            .AnyAsync(x => x.Name.Equals(name));
-        }
-        private async Task<bool> IsExistByNameAsync(string name, string nameDb)
-        {
-            if (name.Equals(nameDb))
-            {
-                return false;
-            }
-
-            return await IsExistByNameAsync(name);
         }
     }
 }

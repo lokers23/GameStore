@@ -5,9 +5,7 @@ using GameStore.Domain.Enums;
 using GameStore.Domain.Helpers;
 using GameStore.Domain.Models;
 using GameStore.Domain.Response;
-using GameStore.Domain.ViewModels.Account;
 using GameStore.Domain.ViewModels.Order;
-using GameStore.Domain.ViewModels.Platform;
 using GameStore.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 

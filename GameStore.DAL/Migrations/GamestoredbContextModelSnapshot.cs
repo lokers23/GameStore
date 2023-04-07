@@ -78,11 +78,11 @@ namespace GameStore.DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<string>("AvatarPath")
+                    b.Property<string>("AvatarName")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)")
-                        .HasColumnName("avatar_path")
+                        .HasColumnName("avatar_name")
                         .HasDefaultValueSql("NULL");
 
                     b.Property<string>("Description")
@@ -173,24 +173,6 @@ namespace GameStore.DAL.Migrations
                     b.ToTable("game_min_spec", (string)null);
                 });
 
-            modelBuilder.Entity("GameStore.Domain.Models.GameOrder", b =>
-                {
-                    b.Property<int>("OrderId")
-                        .HasColumnType("int")
-                        .HasColumnName("order_id");
-
-                    b.Property<int>("GameId")
-                        .HasColumnType("int")
-                        .HasColumnName("game_id");
-
-                    b.HasKey("OrderId", "GameId")
-                        .HasName("Primary_Game_Order");
-
-                    b.HasIndex("GameId");
-
-                    b.ToTable("game_order", (string)null);
-                });
-
             modelBuilder.Entity("GameStore.Domain.Models.Genre", b =>
                 {
                     b.Property<int>("Id")
@@ -228,11 +210,11 @@ namespace GameStore.DAL.Migrations
                         .HasColumnType("int")
                         .HasColumnName("game_id");
 
-                    b.Property<string>("Path")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)")
-                        .HasColumnName("path");
+                        .HasColumnName("name");
 
                     b.HasKey("Id");
 
@@ -283,6 +265,24 @@ namespace GameStore.DAL.Migrations
                         .IsUnique();
 
                     b.ToTable("key", (string)null);
+                });
+
+            modelBuilder.Entity("GameStore.Domain.Models.KeyOrder", b =>
+                {
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int")
+                        .HasColumnName("order_id");
+
+                    b.Property<int>("KeyId")
+                        .HasColumnType("int")
+                        .HasColumnName("key_id");
+
+                    b.HasKey("OrderId", "KeyId")
+                        .HasName("Primary_Key_Order");
+
+                    b.HasIndex("KeyId");
+
+                    b.ToTable("key_order", (string)null);
                 });
 
             modelBuilder.Entity("GameStore.Domain.Models.MinimumSpecification", b =>
@@ -513,27 +513,6 @@ namespace GameStore.DAL.Migrations
                     b.Navigation("MinimumSpecification");
                 });
 
-            modelBuilder.Entity("GameStore.Domain.Models.GameOrder", b =>
-                {
-                    b.HasOne("GameStore.Domain.Models.Game", "Game")
-                        .WithMany("GameOrders")
-                        .HasForeignKey("GameId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_game_order_game_id");
-
-                    b.HasOne("GameStore.Domain.Models.Order", "Order")
-                        .WithMany("GameOrders")
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_game_order_order_id");
-
-                    b.Navigation("Game");
-
-                    b.Navigation("Order");
-                });
-
             modelBuilder.Entity("GameStore.Domain.Models.Image", b =>
                 {
                     b.HasOne("GameStore.Domain.Models.Game", "Game")
@@ -563,6 +542,27 @@ namespace GameStore.DAL.Migrations
                     b.Navigation("Activation");
 
                     b.Navigation("Game");
+                });
+
+            modelBuilder.Entity("GameStore.Domain.Models.KeyOrder", b =>
+                {
+                    b.HasOne("GameStore.Domain.Models.Key", "Key")
+                        .WithMany("KeyOrders")
+                        .HasForeignKey("KeyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_key_order_key_id");
+
+                    b.HasOne("GameStore.Domain.Models.Order", "Order")
+                        .WithMany("KeyOrders")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_key_order_order_id");
+
+                    b.Navigation("Key");
+
+                    b.Navigation("Order");
                 });
 
             modelBuilder.Entity("GameStore.Domain.Models.MinimumSpecification", b =>
@@ -604,8 +604,6 @@ namespace GameStore.DAL.Migrations
 
                     b.Navigation("GameMinSpecifications");
 
-                    b.Navigation("GameOrders");
-
                     b.Navigation("Images");
 
                     b.Navigation("Keys");
@@ -616,6 +614,11 @@ namespace GameStore.DAL.Migrations
                     b.Navigation("GameGenres");
                 });
 
+            modelBuilder.Entity("GameStore.Domain.Models.Key", b =>
+                {
+                    b.Navigation("KeyOrders");
+                });
+
             modelBuilder.Entity("GameStore.Domain.Models.MinimumSpecification", b =>
                 {
                     b.Navigation("GameMinSpecification");
@@ -623,7 +626,7 @@ namespace GameStore.DAL.Migrations
 
             modelBuilder.Entity("GameStore.Domain.Models.Order", b =>
                 {
-                    b.Navigation("GameOrders");
+                    b.Navigation("KeyOrders");
                 });
 
             modelBuilder.Entity("GameStore.Domain.Models.Platform", b =>

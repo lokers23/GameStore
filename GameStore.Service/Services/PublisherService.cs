@@ -1,5 +1,7 @@
-﻿using GameStore.DAL.Interfaces;
+﻿using AutoMapper;
+using GameStore.DAL.Interfaces;
 using GameStore.Domain.Constants;
+using GameStore.Domain.Dto.Publisher;
 using GameStore.Domain.Enums;
 using GameStore.Domain.Helpers;
 using GameStore.Domain.Models;
@@ -14,69 +16,65 @@ namespace GameStore.Service.Services
     public class PublisherService : IPublisherService
     {
         private readonly IRepository<Publisher> _publisherRepository;
+        private readonly IMapper _mapper;
         private readonly ILogger<PublisherService> _logger;
-        public PublisherService(ILogger<PublisherService> logger, IRepository<Publisher> publisherRepository)
+        public PublisherService(ILogger<PublisherService> logger, IRepository<Publisher> publisherRepository, IMapper mapper)
         {
             _logger = logger;
             _publisherRepository = publisherRepository;
+            _mapper = mapper;
         }
-        public async Task<Response<List<Publisher>?>> GetPublishersAsync()
+        public async Task<Response<List<PublisherDto>?>> GetPublishersAsync()
         {
             try
             {
-                var response = new Response<List<Publisher>?>()
-                {
-                    Status = HttpStatusCode.Ok
-                };
-
-                var developer = await _publisherRepository.GetAll().ToListAsync();
-                response.Data = developer;
-
+                var response = new Response<List<PublisherDto>?>();
+                var publisher = await _publisherRepository.GetAll()
+                    .Select(p => _mapper.Map<PublisherDto>(p))
+                    .ToListAsync();
+                
+                response.Data = publisher;
+                response.Status = HttpStatusCode.Ok;
                 return response;
             }
             catch (Exception exception)
             {
-                var response = Catcher.CatchError<List<Publisher>?, PublisherService>(exception, _logger);
+                var response = Catcher.CatchError<List<PublisherDto>?, PublisherService>(exception, _logger);
                 return response;
             }
         }
-        public async Task<Response<Publisher?>> GetPublisherByIdAsync(int id)
+        public async Task<Response<PublisherDto?>> GetPublisherByIdAsync(int id)
         {
             try
             {
-                var response = new Response<Publisher?>()
-                {
-                    Status = HttpStatusCode.Ok
-                };
-
-                var developer = await _publisherRepository.GetAll()
+                var response = new Response<PublisherDto?>();
+                var publisher = await _publisherRepository.GetAll()
                     .FirstOrDefaultAsync(x => x.Id == id);
 
-                if (developer == null)
+                if (publisher == null)
                 {
                     response.Status = HttpStatusCode.NotFound;
-                    response.Message = MessageResponse.NotFoundGenre;
+                    response.Message = MessageResponse.NotFoundEntity;
                     return response;
                 }
 
-                response.Data = developer;
-
+                response.Data = _mapper.Map<PublisherDto>(publisher);
+                response.Status = HttpStatusCode.Ok;
                 return response;
             }
             catch (Exception exception)
             {
-                var response = Catcher.CatchError<Publisher?, PublisherService>(exception, _logger);
+                var response = Catcher.CatchError<PublisherDto?, PublisherService>(exception, _logger);
                 return response;
             }
         }
-        public async Task<Response<Publisher?>> CreatePublisherAsync(PublisherViewModel publisherView)
+        public async Task<Response<PublisherDto?>> CreatePublisherAsync(PublisherViewModel publisherView)
         {
             try
             {
-                var response = new Response<Publisher?>();
-
+                var response = new Response<PublisherDto?>();
                 var responseExist = await CheckExistAsync(publisherView);
-                if (responseExist.Data == true)
+                if (responseExist.Data)
                 {
                     response.Errors = responseExist.Errors;
                     response.Status = responseExist.Status;
@@ -85,41 +83,36 @@ namespace GameStore.Service.Services
                     return response;
                 }
 
-                var publisher = new Publisher()
-                {
-                    Name = publisherView.Name
-                };
-
+                var publisher = _mapper.Map<Publisher>(publisherView);
                 await _publisherRepository.CreateAsync(publisher);
+                
                 response.Status = HttpStatusCode.Created;
-                response.Message = MessageResponse.SuccessCreatedGenre;
-                response.Data = publisher;
-
+                response.Data = _mapper.Map<PublisherDto>(publisher);
                 return response;
             }
             catch (Exception exception)
             {
-                var response = Catcher.CatchError<Publisher?, PublisherService>(exception, _logger);
+                var response = Catcher.CatchError<PublisherDto?, PublisherService>(exception, _logger);
                 return response;
             }
         }
-        public async Task<Response<Publisher?>> UpdatePublisherAsync(int id, PublisherViewModel publisherView)
+        public async Task<Response<PublisherDto?>> UpdatePublisherAsync(int id, PublisherViewModel publisherView)
         {
             try
             {
-                var response = new Response<Publisher?>();
+                var response = new Response<PublisherDto?>();
                 var publisher = await _publisherRepository.GetAll()
                     .FirstOrDefaultAsync(x => x.Id == id);
 
                 if (publisher == null)
                 {
                     response.Status = HttpStatusCode.NotFound;
-                    response.Message = MessageResponse.NotFoundGenre;
+                    response.Message = MessageResponse.NotFoundEntity;
                     return response;
                 }
 
-                var responseExist = await CheckExistAsync(publisherView, publisher);
-                if (responseExist.Data == true)
+                var responseExist = await CheckExistAsync(publisherView, id);
+                if (responseExist.Data)
                 {
                     response.Errors = responseExist.Errors;
                     response.Status = responseExist.Status;
@@ -130,14 +123,14 @@ namespace GameStore.Service.Services
 
                 publisher.Name = publisherView.Name;
                 await _publisherRepository.UpdateAsync(publisher);
-                response.Data = publisher;
+                
+                response.Data = _mapper.Map<PublisherDto>(publisher);
                 response.Status = HttpStatusCode.NoContent;
-
                 return response;
             }
             catch (Exception exception)
             {
-                var response = Catcher.CatchError<Publisher?, PublisherService>(exception, _logger);
+                var response = Catcher.CatchError<PublisherDto?, PublisherService>(exception, _logger);
                 return response;
             }
         }
@@ -145,23 +138,20 @@ namespace GameStore.Service.Services
         {
             try
             {
-                var response = new Response<bool?>()
-                {
-                    Status = HttpStatusCode.NoContent
-                };
-
+                var response = new Response<bool?>();
                 var publisher = await _publisherRepository.GetAll()
                     .FirstOrDefaultAsync(x => x.Id == id);
 
                 if (publisher == null)
                 {
                     response.Status = HttpStatusCode.NotFound;
-                    response.Message = MessageResponse.NotFoundGenre;
+                    response.Message = MessageResponse.NotFoundEntity;
                     return response;
                 }
 
                 await _publisherRepository.DeleteAsync(publisher);
 
+                response.Status = HttpStatusCode.NoContent;
                 return response;
             }
             catch (Exception exception)
@@ -170,7 +160,7 @@ namespace GameStore.Service.Services
                 return response;
             }
         }
-        public async Task<Response<bool>> CheckExistAsync(PublisherViewModel publisherView, Publisher? publisherDb = null)
+        public async Task<Response<bool>> CheckExistAsync(PublisherViewModel publisherView, int id = 0)
         {
             var response = new Response<bool>()
             {
@@ -178,38 +168,18 @@ namespace GameStore.Service.Services
                 Errors = new Dictionary<string, string[]>()
             };
 
-            bool isExistByName;
-            if (publisherDb == null)
-            {
-                isExistByName = await IsExistByNameAsync(publisherView.Name);
-            }
-            else
-            {
-                isExistByName = await IsExistByNameAsync(publisherView.Name, publisherDb.Name);
-            }
-
-            if (isExistByName)
+            var isExist = await _publisherRepository.GetAll().AnyAsync(m => 
+                m.Id != id &&
+                m.Name.Equals(publisherView.Name));
+        
+            if (isExist)
             {
                 response.Status = HttpStatusCode.Conflict;
                 response.Data = true;
-                response.Errors.Add(publisherView.Name, new[] { MessageError.EntityNameExist });
+                response.Errors.Add(nameof(Publisher), new[] { MessageError.EntityExists });
             }
 
             return response;
-        }
-        private async Task<bool> IsExistByNameAsync(string name)
-        {
-            return await _publisherRepository.GetAll()
-            .AnyAsync(x => x.Name.Equals(name));
-        }
-        private async Task<bool> IsExistByNameAsync(string name, string nameDb)
-        {
-            if (name.Equals(nameDb))
-            {
-                return false;
-            }
-
-            return await IsExistByNameAsync(name);
         }
     }
 }

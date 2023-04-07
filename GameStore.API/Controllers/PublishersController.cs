@@ -2,7 +2,6 @@
 using GameStore.Domain.Constants;
 using GameStore.Domain.Helpers;
 using GameStore.Domain.Models;
-using GameStore.Domain.ViewModels.Developer;
 using GameStore.Domain.ViewModels.Publisher;
 using GameStore.Service.Interfaces;
 using GameStore.Service.Services;

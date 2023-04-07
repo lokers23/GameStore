@@ -3,7 +3,6 @@ using GameStore.Domain.Constants;
 using GameStore.Domain.Enums;
 using GameStore.Domain.Helpers;
 using GameStore.Domain.Models;
-using GameStore.Domain.ViewModels.Developer;
 using GameStore.Domain.ViewModels.MinimumSpecification;
 using GameStore.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -17,7 +16,8 @@ public class MinSpecController: ControllerBase
         private readonly IMinSpecificationService _minSpecService;
         private readonly IPlatformService _platformService;
         private readonly ILogger<MinSpecController> _logger;
-        public MinSpecController(IMinSpecificationService minSpecService, IPlatformService platformService, ILogger<MinSpecController> logger)
+        public MinSpecController(IMinSpecificationService minSpecService, IPlatformService platformService, 
+            ILogger<MinSpecController> logger)
         {
             _minSpecService = minSpecService;
             _platformService = platformService;
@@ -60,7 +60,7 @@ public class MinSpecController: ControllerBase
         }
         
         [HttpPost]
-        public async Task<IActionResult> CreateDeveloper([FromBody] MinSpecificationViewModel minSpecView)
+        public async Task<IActionResult> CreateMinSpecification([FromBody] MinSpecificationViewModel minSpecView)
         {
             try
             {
@@ -92,7 +92,7 @@ public class MinSpecController: ControllerBase
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateDeveloper(int id, [FromBody] MinSpecificationViewModel minSpecView)
+        public async Task<IActionResult> UpdateMinSpecification(int id, [FromBody] MinSpecificationViewModel minSpecView)
         {
             try
             {
@@ -129,7 +129,7 @@ public class MinSpecController: ControllerBase
         }
         
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteDeveloper(int id)
+        public async Task<IActionResult> DeleteMinSpecification(int id)
         {
             try
             {

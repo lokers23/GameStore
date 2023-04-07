@@ -1,5 +1,7 @@
-﻿using GameStore.DAL.Interfaces;
+﻿using AutoMapper;
+using GameStore.DAL.Interfaces;
 using GameStore.Domain.Constants;
+using GameStore.Domain.Dto.Order;
 using GameStore.Domain.Enums;
 using GameStore.Domain.Helpers;
 using GameStore.Domain.Models;
@@ -14,68 +16,65 @@ namespace GameStore.Service.Services;
 public class OrderService: IOrderService
 {
     private readonly IRepository<Order> _orderRepository;
+    private readonly IMapper _mapper;
     private readonly ILogger<OrderService> _logger;
-    public OrderService(ILogger<OrderService> logger, IRepository<Order> orderRepository)
+    public OrderService(ILogger<OrderService> logger, IRepository<Order> orderRepository, IMapper mapper)
     {
         _logger = logger;
         _orderRepository = orderRepository;
+        _mapper = mapper;
     }
-    public async Task<Response<List<Order>?>> GetOrdersAsync()
+    public async Task<Response<List<OrderDto>?>> GetOrdersAsync()
     {
         try
         {
-            var response = new Response<List<Order>?>()
-            {
-                Status = HttpStatusCode.Ok
-            };
-
-            var orders = await _orderRepository.GetAll().ToListAsync();
+            var response = new Response<List<OrderDto>?>();
+            var orders = await _orderRepository.GetAll()
+                .Include(order => order.User)
+                .Select(order => _mapper.Map<OrderDto>(order))
+                .ToListAsync();
+            
             response.Data = orders;
-
+            response.Status = HttpStatusCode.Ok;
             return response;
         }
         catch (Exception exception)
         {
-            var response = Catcher.CatchError<List<Order>?, OrderService>(exception, _logger);
+            var response = Catcher.CatchError<List<OrderDto>?, OrderService>(exception, _logger);
             return response;
         }
     }
-
-    public async Task<Response<Order?>> GetOrderByIdAsync(int id)
+    public async Task<Response<OrderDto?>> GetOrderByIdAsync(int id)
     {
         try
         {
-            var response = new Response<Order?>()
-            {
-                Status = HttpStatusCode.Ok
-            };
-
+            var response = new Response<OrderDto?>();
             var order = await _orderRepository.GetAll()
+                .Include(order => order.User)
                 .FirstOrDefaultAsync(x => x.Id == id);
 
             if (order == null)
             {
                 response.Status = HttpStatusCode.NotFound;
-                response.Message = MessageResponse.NotFoundGenre;
+                response.Message = MessageResponse.NotFoundEntity;
                 return response;
             }
 
-            response.Data = order;
-
+            response.Data = _mapper.Map<OrderDto>(order);
+            response.Status = HttpStatusCode.Ok;
             return response;
         }
         catch (Exception exception)
         {
-            var response = Catcher.CatchError<Order?, OrderService>(exception, _logger);
+            var response = Catcher.CatchError<OrderDto?, OrderService>(exception, _logger);
             return response;
         }
     }
-
-    public async Task<Response<Order?>> CreateOrderAsync(OrderViewModel orderView)
+    public async Task<Response<OrderDto?>> CreateOrderAsync(OrderViewModel orderView)
     {
         try
         {
-            var response = new Response<Order?>();
+            var response = new Response<OrderDto?>();
 
             // var responseExist = await CheckExistAsync(orderView);
             // if (responseExist.Data == true)
@@ -87,37 +86,32 @@ public class OrderService: IOrderService
             //     return response;
             // }
 
-            var order = new Order()
-            {
-                
-            };
-
+            var order = _mapper.Map<Order>(orderView);
             await _orderRepository.CreateAsync(order);
+            
             response.Status = HttpStatusCode.Created;
-            response.Message = MessageResponse.SuccessCreatedGenre;
-            response.Data = order;
-
+            response.Data = _mapper.Map<OrderDto>(order);
             return response;
         }
         catch (Exception exception)
         {
-            var response = Catcher.CatchError<Order?, OrderService>(exception, _logger);
+            var response = Catcher.CatchError<OrderDto?, OrderService>(exception, _logger);
             return response;
         }
     }
 
-    public async Task<Response<Order?>> UpdateOrderAsync(int id, OrderViewModel orderView)
+    public async Task<Response<OrderDto?>> UpdateOrderAsync(int id, OrderViewModel orderView)
     {
         try
         {
-            var response = new Response<Order?>();
+            var response = new Response<OrderDto?>();
             var order = await _orderRepository.GetAll()
                 .FirstOrDefaultAsync(x => x.Id == id);
 
             if (order == null)
             {
                 response.Status = HttpStatusCode.NotFound;
-                response.Message = MessageResponse.NotFoundGenre;
+                response.Message = MessageResponse.NotFoundEntity;
                 return response;
             }
 
@@ -133,39 +127,35 @@ public class OrderService: IOrderService
 
             //order.Name = orderView.Name;
             await _orderRepository.UpdateAsync(order);
-            response.Data = order;
+            
+            response.Data = _mapper.Map<OrderDto>(order);
             response.Status = HttpStatusCode.NoContent;
-
             return response;
         }
         catch (Exception exception)
         {
-            var response = Catcher.CatchError<Order?, OrderService>(exception, _logger);
+            var response = Catcher.CatchError<OrderDto?, OrderService>(exception, _logger);
             return response;
         }
     }
-
     public async Task<Response<bool?>> DeleteOrderAsync(int id)
     {
         try
         {
-            var response = new Response<bool?>()
-            {
-                Status = HttpStatusCode.NoContent
-            };
-
+            var response = new Response<bool?>();
             var order = await _orderRepository.GetAll()
                 .FirstOrDefaultAsync(x => x.Id == id);
 
             if (order == null)
             {
                 response.Status = HttpStatusCode.NotFound;
-                response.Message = MessageResponse.NotFoundGenre;
+                response.Message = MessageResponse.NotFoundEntity;
                 return response;
             }
 
             await _orderRepository.DeleteAsync(order);
 
+            response.Status = HttpStatusCode.NoContent;
             return response;
         }
         catch (Exception exception)
@@ -173,5 +163,9 @@ public class OrderService: IOrderService
             var response = Catcher.CatchError<bool?, OrderService>(exception, _logger);
             return response;
         }
+    }
+    public async Task<Response<bool>> CheckExistAsync(OrderViewModel activationView, int id)
+    {
+        throw new NotImplementedException();
     }
 }

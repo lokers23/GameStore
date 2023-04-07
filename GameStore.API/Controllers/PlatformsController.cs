@@ -2,8 +2,6 @@
 using GameStore.Domain.Constants;
 using GameStore.Domain.Helpers;
 using GameStore.Domain.Models;
-using GameStore.Domain.ViewModels.Platform;
-using GameStore.Domain.ViewModels.Publisher;
 using GameStore.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -11,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using GameStore.Domain.ViewModels.Platform;
 
 namespace GameStore.API.Controllers
 {

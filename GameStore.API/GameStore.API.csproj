@@ -7,6 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="12.0.1" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.11" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.8">
       <PrivateAssets>all</PrivateAssets>
@@ -28,7 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="wwwroot\img\1\123.jpg" />
+    <None Include="wwwroot\images\1\123.jpg" />
   </ItemGroup>
 
 </Project>

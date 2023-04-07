@@ -12,5 +12,6 @@ namespace GameStore.Domain.Models
 
         public virtual Activation Activation { get; set; }
         public virtual Game Game { get; set; }
+        public virtual ICollection<KeyOrder> KeyOrders { get; set; }
     }
 }

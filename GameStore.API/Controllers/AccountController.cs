@@ -108,7 +108,7 @@ namespace GameStore.API.Controllers
                 
                 var tokenResponse = new ResponseJwt()
                 {
-                    Token = _userService.CreateToken(user.Data, AccessRole.User),
+                    Token = _userService.CreateToken(user.Data, user.Data.Role),
                     Status = HttpStatusCode.Ok,
                     Role = user.Data.Role.ToString()
                 };

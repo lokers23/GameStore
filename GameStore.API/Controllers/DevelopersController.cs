@@ -4,7 +4,6 @@ using GameStore.Domain.Enums;
 using GameStore.Domain.Helpers;
 using GameStore.Domain.Models;
 using GameStore.Domain.ViewModels.Developer;
-using GameStore.Domain.ViewModels.Genre;
 using GameStore.Service.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;

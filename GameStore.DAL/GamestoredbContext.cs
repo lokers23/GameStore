@@ -22,7 +22,8 @@ namespace GameStore.DAL
         public virtual DbSet<Developer> Developers { get; set; }
         public virtual DbSet<Game> Games { get; set; }
         public virtual DbSet<GameGenre> GameGenres { get; set; }
-        public virtual DbSet<GameOrder> GameOrders { get; set; }
+        //public virtual DbSet<GameOrder> GameOrders { get; set; }
+        public virtual DbSet<KeyOrder> KeyOrders { get; set; }
         public virtual DbSet<Genre> Genres { get; set; }
         public virtual DbSet<Key> Keys { get; set; }
         public virtual DbSet<MinimumSpecification> MinimumSpecifications { get; set; }
@@ -94,9 +95,9 @@ namespace GameStore.DAL
                     .HasColumnType("int")
                     .HasColumnName("id");
 
-                entity.Property(e => e.AvatarPath)
+                entity.Property(e => e.AvatarName)
                     .HasMaxLength(1000)
-                    .HasColumnName("avatar_path")
+                    .HasColumnName("avatar_name")
                     .HasDefaultValueSql("NULL");
 
                 entity.Property(e => e.DeveloperId)
@@ -195,31 +196,57 @@ namespace GameStore.DAL
                     .HasForeignKey(d => d.MinimumSpecificationId)
                     .HasConstraintName("FK_game_min_spec_min_spec_id");
             });
-            
-            modelBuilder.Entity<GameOrder>(entity =>
-            {
-                entity.HasKey(e => new { e.OrderId, e.GameId })
-                    .HasName("Primary_Game_Order");
 
-                entity.ToTable("game_order");
-                
+            //modelBuilder.Entity<GameOrder>(entity =>
+            //{
+            //    entity.HasKey(e => new { e.OrderId, e.GameId })
+            //        .HasName("Primary_Game_Order");
+
+            //    entity.ToTable("game_order");
+
+            //    entity.Property(e => e.OrderId)
+            //        .HasColumnType("int")
+            //        .HasColumnName("order_id");
+
+            //    entity.Property(e => e.GameId)
+            //        .HasColumnType("int")
+            //        .HasColumnName("game_id");
+
+            //    entity.HasOne(d => d.Order)
+            //        .WithMany(p => p.GameOrders)
+            //        .HasForeignKey(d => d.OrderId)
+            //        .HasConstraintName("FK_game_order_order_id");
+
+            //    entity.HasOne(d => d.Game)
+            //        .WithMany(p => p.GameOrders)
+            //        .HasForeignKey(d => d.GameId)
+            //        .HasConstraintName("FK_game_order_game_id");
+            //});
+
+            modelBuilder.Entity<KeyOrder>(entity =>
+            {
+                entity.HasKey(e => new { e.OrderId, e.KeyId })
+                    .HasName("Primary_Key_Order");
+
+                entity.ToTable("key_order");
+
                 entity.Property(e => e.OrderId)
                     .HasColumnType("int")
                     .HasColumnName("order_id");
 
-                entity.Property(e => e.GameId)
+                entity.Property(e => e.KeyId)
                     .HasColumnType("int")
-                    .HasColumnName("game_id");
+                    .HasColumnName("key_id");
 
                 entity.HasOne(d => d.Order)
-                    .WithMany(p => p.GameOrders)
+                    .WithMany(p => p.KeyOrders)
                     .HasForeignKey(d => d.OrderId)
-                    .HasConstraintName("FK_game_order_order_id");
-                
-                entity.HasOne(d => d.Game)
-                    .WithMany(p => p.GameOrders)
-                    .HasForeignKey(d => d.GameId)
-                    .HasConstraintName("FK_game_order_game_id");
+                    .HasConstraintName("FK_key_order_order_id");
+
+                entity.HasOne(d => d.Key)
+                    .WithMany(p => p.KeyOrders)
+                    .HasForeignKey(d => d.KeyId)
+                    .HasConstraintName("FK_key_order_key_id");
             });
 
             modelBuilder.Entity<Genre>(entity =>
@@ -462,10 +489,10 @@ namespace GameStore.DAL
                     .HasColumnType("int")
                     .HasColumnName("id");
 
-                entity.Property(e => e.Path)
+                entity.Property(e => e.Name)
                     .IsRequired()
                     .HasMaxLength(100)
-                    .HasColumnName("path");
+                    .HasColumnName("name");
                 
                 entity.Property(e => e.GameId)
                     .IsRequired()
