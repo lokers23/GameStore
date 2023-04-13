@@ -166,6 +166,25 @@ public class KeyService: IKeyService
             return response;
         }
     }
+
+    public async Task<bool> MarkUsedKeysAsync(List<KeyDto> keys)
+    {
+        try
+        {
+            foreach (var key in keys.Select(keyDto => _mapper.Map<Key>(keyDto)))
+            {
+                key.IsUsed = true;
+                await _keyRepository.UpdateAsync(key);
+            }
+
+            return true;
+        }
+        catch (Exception exception)
+        {
+            return false;
+        }
+    }
+
     public async Task<Response<bool>> CheckExistAsync(KeyViewModel keyViewModel, int id = 0)
     {
         var response = new Response<bool>()

@@ -44,6 +44,8 @@ builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IPlatformService, PlatformService>();
 builder.Services.AddScoped<IActivationService, ActivationService>();
 builder.Services.AddScoped<IGameService, GameService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IKeyService, KeyService>();
 #endregion
 
 #region Services for add to scope repository
@@ -56,6 +58,8 @@ builder.Services.AddScoped<IRepository<Image>, ImageRepository>();
 builder.Services.AddScoped<IRepository<Platform>, PlatformRepository>();
 builder.Services.AddScoped<IRepository<Activation>, ActivationRepository>();
 builder.Services.AddScoped<IRepository<Game>, GameRepository>();
+builder.Services.AddScoped<IRepository<Order>, OrderRepository>();
+builder.Services.AddScoped<IRepository<Key>, KeyRepository>();
 #endregion
 
 builder.Services.AddDbContext<GamestoredbContext>();

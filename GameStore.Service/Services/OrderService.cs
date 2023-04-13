@@ -16,12 +16,15 @@ namespace GameStore.Service.Services;
 public class OrderService: IOrderService
 {
     private readonly IRepository<Order> _orderRepository;
+    private readonly IRepository<Key> _keyRepository;
     private readonly IMapper _mapper;
     private readonly ILogger<OrderService> _logger;
-    public OrderService(ILogger<OrderService> logger, IRepository<Order> orderRepository, IMapper mapper)
+    public OrderService(ILogger<OrderService> logger, IRepository<Order> orderRepository, 
+        IRepository<Key> keyRepository, IMapper mapper)
     {
         _logger = logger;
         _orderRepository = orderRepository;
+        _keyRepository = keyRepository;
         _mapper = mapper;
     }
     public async Task<Response<List<OrderDto>?>> GetOrdersAsync()
@@ -31,6 +34,8 @@ public class OrderService: IOrderService
             var response = new Response<List<OrderDto>?>();
             var orders = await _orderRepository.GetAll()
                 .Include(order => order.User)
+                .Include(order => order.KeyOrders)
+                    .ThenInclude(keyOrder => keyOrder.Key)
                 .Select(order => _mapper.Map<OrderDto>(order))
                 .ToListAsync();
             
@@ -51,6 +56,8 @@ public class OrderService: IOrderService
             var response = new Response<OrderDto?>();
             var order = await _orderRepository.GetAll()
                 .Include(order => order.User)
+                .Include(order => order.KeyOrders)
+                    .ThenInclude(keyOrder => keyOrder.Key)
                 .FirstOrDefaultAsync(x => x.Id == id);
 
             if (order == null)
@@ -70,23 +77,45 @@ public class OrderService: IOrderService
             return response;
         }
     }
-    public async Task<Response<OrderDto?>> CreateOrderAsync(OrderViewModel orderView)
+    public async Task<Response<OrderDto?>> CreateOrderAsync(OrderViewModel orderView, int userId)
     {
         try
         {
             var response = new Response<OrderDto?>();
+            var order = new Order()
+            {
+                PayOn = DateTime.Now,
+                UserId = userId,
+            };
+            
+            var keys = new List<string?>();
+            foreach (var gameId in orderView.GameIds)
+            {
+                
+                var key = await _keyRepository.GetAll()
+                    .FirstOrDefaultAsync(key => 
+                        key.GameId == gameId &&
+                        key.IsUsed == false &&
+                        !keys.Contains(key.Value));
+                
+                if (key == null)
+                {
+                    continue;
+                }
+                
+                var keyOrder = new KeyOrder { KeyId = key.Id, Order = order };
+                order.KeyOrders.Add(keyOrder); 
+                keys.Add(key.Value);
+            }
 
-            // var responseExist = await CheckExistAsync(orderView);
-            // if (responseExist.Data == true)
-            // {
-            //     response.Errors = responseExist.Errors;
-            //     response.Status = responseExist.Status;
-            //     response.Message = responseExist.Message;
-            //
-            //     return response;
-            // }
-
-            var order = _mapper.Map<Order>(orderView);
+            if (keys.Count != orderView.GameIds.Count)
+            {
+                response.Status = HttpStatusCode.Conflict;
+                response.Errors = new Dictionary<string, string[]> {{"Key", new[] { "Не достаточно ключей" }}};
+                // надо будет с выводом сообщения о том что не хватает ключей
+                return response;
+            }
+            
             await _orderRepository.CreateAsync(order);
             
             response.Status = HttpStatusCode.Created;

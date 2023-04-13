@@ -1,4 +1,5 @@
-﻿using GameStore.API.Extensions;
+﻿using System.Security.Claims;
+using GameStore.API.Extensions;
 using GameStore.API.Helpers;
 using GameStore.Domain.Constants;
 using GameStore.Domain.Enums;
@@ -16,11 +17,15 @@ namespace GameStore.API.Controllers
     public class OrderController : ControllerBase
     {
         private readonly IOrderService _orderService;
+        private readonly IKeyService _keyService;
+        private readonly IUserService _userService;
         private readonly ILogger<OrderController> _logger;
 
-        public OrderController(IOrderService orderService, ILogger<OrderController> logger)
+        public OrderController(IOrderService orderService, IKeyService keyService, IUserService userService,ILogger<OrderController> logger)
         {
             _orderService = orderService;
+            _keyService = keyService;
+            _userService = userService;
             _logger = logger;
         }
 
@@ -90,12 +95,21 @@ namespace GameStore.API.Controllers
                     return BadRequest(new { Message = MessageResponse.Invalid, Errors = errors });
                 }
 
-                var response = await _orderService.CreateOrderAsync(orderView);
+                var claimsIndentity = User.Identity as ClaimsIdentity;
+                var success = int.TryParse(claimsIndentity.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId);
+                var isExists = await _userService.GetUserByIdAsync(userId);
+                if (isExists.Status == HttpStatusCode.NotFound)
+                {
+                    return StatusCode((int)isExists.Status, isExists);
+                }
+                
+                var response = await _orderService.CreateOrderAsync(orderView, userId);
                 if ((int)response.Status >= 300)
                 {
                     return StatusCode((int)response.Status, response);
                 }
 
+                var isSuccess = await _keyService.MarkUsedKeysAsync(response.Data.Keys);
                 return CreatedAtAction(nameof(GetOrderById), new { id = response.Data?.Id }, response);
             }
             catch (Exception exception)
@@ -120,13 +134,23 @@ namespace GameStore.API.Controllers
                     var errors = ModelState.AllErrors();
                     return BadRequest(new { Message = MessageResponse.Invalid, Errors = errors });
                 }
-
+                
+                var claimsIndentity = User.Identity as ClaimsIdentity;
+                var success = int.TryParse(claimsIndentity.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId);
+                var isExists = await _userService.GetUserByIdAsync(userId);
+                
+                if (isExists.Status == HttpStatusCode.NotFound)
+                {
+                    return StatusCode((int)isExists.Status, isExists);
+                }
+                
                 var response = await _orderService.UpdateOrderAsync(id, orderView);
                 if ((int)response.Status >= 300)
                 {
                     return StatusCode((int)response.Status, response);
                 }
 
+                var isSuccess = await _keyService.MarkUsedKeysAsync(response.Data.Keys);
                 return NoContent();
             }
             catch (Exception exception)

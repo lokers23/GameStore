@@ -49,9 +49,12 @@ public class AutoMapperProfile: Profile
         CreateMap<Genre, GenreDto>();
         CreateMap<Image, ImageDto>();
         CreateMap<Key, KeyDto>();
-        CreateMap<Order, OrderDto>();
+        CreateMap<Order, OrderDto>()
+            .ForMember(dest => dest.Keys, 
+                opt => opt.MapFrom(src => src.KeyOrders.Select(ko => ko.Key)));;
         CreateMap<Publisher, PublisherDto>();
         CreateMap<User, UserDto>();
+        CreateMap<User, UserShortDto>();
         CreateMap<Game, GameDto>();
         #endregion
     }

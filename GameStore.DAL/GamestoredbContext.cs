@@ -87,7 +87,8 @@ namespace GameStore.DAL
                 entity.HasIndex(e => e.DeveloperId, "developer_id");
 
                 entity.HasIndex(e => e.Name, "name")
-                    .IsUnique();
+                    //.IsUnique()
+                    ;
 
                 entity.HasIndex(e => e.PublisherId, "publisher_id");
                 

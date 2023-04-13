@@ -1,4 +1,5 @@
 ﻿using GameStore.Domain.Dto.Key;
+using GameStore.Domain.Models;
 using GameStore.Domain.Response;
 using GameStore.Domain.ViewModels.Key;
 
@@ -11,6 +12,6 @@ public interface IKeyService
     Task<Response<KeyDto?>> CreateKeyAsync(KeyViewModel keyViewModel);
     Task<Response<KeyDto?>> UpdateKeyAsync(int id, KeyViewModel keyViewModel);
     Task<Response<bool?>> DeleteKeyAsync(int id);
-    
+    Task<bool> MarkUsedKeysAsync(List<KeyDto> keys);
     Task<Response<bool>> CheckExistAsync(KeyViewModel keyViewModel, int id);
 }

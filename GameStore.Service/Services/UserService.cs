@@ -260,6 +260,7 @@ namespace GameStore.Service.Services
         {
             List<Claim> claims = new()
             {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.Login),
                 new Claim(ClaimTypes.Role, role.ToString())
             };
