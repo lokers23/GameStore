@@ -1,13 +1,9 @@
 ﻿using GameStore.API.Extensions;
-using GameStore.API.Helpers;
 using GameStore.Domain.Constants;
-using GameStore.Domain.Enums;
+using GameStore.Domain.Dto.Activation;
 using GameStore.Domain.Helpers;
-using GameStore.Domain.Models;
-using GameStore.Domain.Response;
 using GameStore.Domain.ViewModels.Activation;
 using GameStore.Service.Interfaces;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GameStore.API.Controllers
@@ -34,7 +30,7 @@ namespace GameStore.API.Controllers
             }
             catch (Exception exception)
             {
-                var response = Catcher.CatchError<List<Activation>?, ActivationsController>(exception, _logger);
+                var response = Catcher.CatchError<List<ActivationDto>?, ActivationsController>(exception, _logger);
                 return StatusCode((int)response.Status, response);
             }
         }
@@ -54,7 +50,7 @@ namespace GameStore.API.Controllers
             }
             catch (Exception exception)
             {
-                var response = Catcher.CatchError<Activation?, ActivationsController>(exception, _logger);
+                var response = Catcher.CatchError<ActivationDto?, ActivationsController>(exception, _logger);
                 return StatusCode((int)response.Status, response);
             }
         }
@@ -131,7 +127,7 @@ namespace GameStore.API.Controllers
             }
             catch (Exception exception)
             {
-                var response = Catcher.CatchError<Activation?, ActivationsController>(exception, _logger);
+                var response = Catcher.CatchError<ActivationDto?, ActivationsController>(exception, _logger);
                 return StatusCode((int)response.Status, response);
             }
         }

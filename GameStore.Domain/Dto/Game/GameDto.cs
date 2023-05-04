@@ -1,4 +1,7 @@
-﻿using GameStore.Domain.Dto.Publisher;
+﻿using GameStore.Domain.Dto.Developer;
+using GameStore.Domain.Dto.Genre;
+using GameStore.Domain.Dto.MinimumSpecification;
+using GameStore.Domain.Dto.Publisher;
 
 namespace GameStore.Domain.Dto.Game;
 
@@ -13,4 +16,6 @@ public class GameDto
     public decimal? Price { get; set; }
     public string? VideoUrl { get; set; }
     public string? AvatarName { get; set; }
+    public List<GenreDto>? Genres { get; set; }
+    public List<MinSpecDto>? MinimumSpecifications { get; set; }
 }

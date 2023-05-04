@@ -1,14 +1,10 @@
 ﻿using GameStore.API.Extensions;
 using GameStore.Domain.Constants;
-using GameStore.Domain.Enums;
+using GameStore.Domain.Dto.Developer;
 using GameStore.Domain.Helpers;
-using GameStore.Domain.Models;
 using GameStore.Domain.ViewModels.Developer;
 using GameStore.Service.Interfaces;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.OpenApi.Extensions;
 
 namespace GameStore.API.Controllers
 {
@@ -35,7 +31,7 @@ namespace GameStore.API.Controllers
             }
             catch (Exception exception)
             {
-                var response = Catcher.CatchError<List<Developer>?, DevelopersController>(exception, _logger);
+                var response = Catcher.CatchError<List<DeveloperDto>?, DevelopersController>(exception, _logger);
                 return StatusCode((int)response.Status, response);
             }
         }
@@ -55,7 +51,7 @@ namespace GameStore.API.Controllers
             }
             catch (Exception exception)
             {
-                var response = Catcher.CatchError<Developer?, DevelopersController>(exception, _logger);
+                var response = Catcher.CatchError<DeveloperDto?, DevelopersController>(exception, _logger);
                 return StatusCode((int)response.Status, response);
             }
         }
@@ -132,7 +128,7 @@ namespace GameStore.API.Controllers
             }
             catch (Exception exception)
             {
-                var response = Catcher.CatchError<Developer?, DevelopersController>(exception, _logger);
+                var response = Catcher.CatchError<DeveloperDto?, DevelopersController>(exception, _logger);
                 return StatusCode((int)response.Status, response);
             }
         }

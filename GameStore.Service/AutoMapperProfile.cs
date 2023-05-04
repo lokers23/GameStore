@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using GameStore.Domain.Dto.Activation;
+using GameStore.Domain.Dto.Developer;
 using GameStore.Domain.Dto.Game;
 using GameStore.Domain.Dto.Genre;
 using GameStore.Domain.Dto.Image;
@@ -51,11 +53,15 @@ public class AutoMapperProfile: Profile
         CreateMap<Key, KeyDto>();
         CreateMap<Order, OrderDto>()
             .ForMember(dest => dest.Keys, 
-                opt => opt.MapFrom(src => src.KeyOrders.Select(ko => ko.Key)));;
+                opt => opt.MapFrom(src => src.KeyOrders.Select(ko => ko.Key)));
         CreateMap<Publisher, PublisherDto>();
         CreateMap<User, UserDto>();
         CreateMap<User, UserShortDto>();
-        CreateMap<Game, GameDto>();
+        CreateMap<Game, GameDto>()
+            .ForMember(dest => dest.Genres,
+                opt => opt.MapFrom(src => src.GameGenres.Select(ko => ko.Genre)))
+            .ForMember(dest => dest.MinimumSpecifications,
+                opt => opt.MapFrom(src => src.GameMinSpecifications.Select(ko => ko.MinimumSpecification)));
         #endregion
     }
 }

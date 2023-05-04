@@ -25,7 +25,7 @@ public class MinSpecificationService: IMinSpecificationService
         _minSpecRepository = minSpecRepository;
         _mapper = mapper;
     }
-    public async Task<Response<List<MinSpecDto>?>> GetMinSpecsAsync()
+    public async Task<Response<List<MinSpecDto>?>> GetMinSpecsAsync(string? platformName)
     {
         try
         {
@@ -34,10 +34,23 @@ public class MinSpecificationService: IMinSpecificationService
                 Status = HttpStatusCode.Ok
             };
 
-            var minSpecifications = await _minSpecRepository.GetAll()
-                .Include(m => m.Platform)
-                .Select(minSpecification => _mapper.Map<MinSpecDto>(minSpecification))
+
+            List<MinSpecDto> minSpecifications;
+            if (!string.IsNullOrWhiteSpace(platformName))
+            {
+                minSpecifications = await _minSpecRepository.GetAll()
+                    .Include(m => m.Platform)
+                    .Where(m => m.Platform.Name == platformName)
+                    .Select(minSpecification => _mapper.Map<MinSpecDto>(minSpecification))
                 .ToListAsync();
+            }
+            else
+            {
+                minSpecifications = await _minSpecRepository.GetAll()
+                    .Include(m => m.Platform)
+                    .Select(minSpecification => _mapper.Map<MinSpecDto>(minSpecification))
+                .ToListAsync();
+            }
             
             response.Data = minSpecifications;
             return response;

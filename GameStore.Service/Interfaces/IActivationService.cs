@@ -1,4 +1,4 @@
-﻿using GameStore.Domain.Dto.Publisher;
+﻿using GameStore.Domain.Dto.Activation;
 using GameStore.Domain.Response;
 using GameStore.Domain.ViewModels.Activation;
 

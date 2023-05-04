@@ -1,5 +1,5 @@
-﻿using GameStore.Domain.Dto.Game;
-using GameStore.Domain.Dto.Publisher;
+﻿using GameStore.Domain.Dto.Activation;
+using GameStore.Domain.Dto.Game;
 
 namespace GameStore.Domain.Dto.Key;
 

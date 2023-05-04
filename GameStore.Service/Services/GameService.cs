@@ -2,7 +2,6 @@
 using GameStore.DAL.Interfaces;
 using GameStore.Domain.Constants;
 using GameStore.Domain.Dto.Game;
-using GameStore.Domain.Dto.Genre;
 using GameStore.Domain.Enums;
 using GameStore.Domain.Helpers;
 using GameStore.Domain.Models;
@@ -14,7 +13,7 @@ using Microsoft.Extensions.Logging;
 
 namespace GameStore.Service.Services;
 
-public class GameService: IGameService
+public class GameService : IGameService
 {
     private readonly IRepository<Game> _gameRepository;
     private readonly IMapper _mapper;
@@ -33,9 +32,14 @@ public class GameService: IGameService
             var games = await _gameRepository.GetAll()
                 .Include(game => game.Publisher)
                 .Include(game => game.Developer)
+                .Include(game => game.GameMinSpecifications)
+                    .ThenInclude(gm => gm.MinimumSpecification)
+                        .ThenInclude(ms => ms.Platform)
+                .Include(game => game.GameGenres)
+                    .ThenInclude(gg => gg.Genre)
                 .Select(game => _mapper.Map<GameDto>(game))
                 .ToListAsync();
-            
+
             response.Data = games;
             response.Status = HttpStatusCode.Ok;
             return response;
@@ -54,6 +58,11 @@ public class GameService: IGameService
             var game = await _gameRepository.GetAll()
                 .Include(game => game.Publisher)
                 .Include(game => game.Developer)
+                .Include(game => game.GameMinSpecifications)
+                    .ThenInclude(gm => gm.MinimumSpecification)
+                        .ThenInclude(ms => ms.Platform)
+                .Include(game => game.GameGenres)
+                    .ThenInclude(gg => gg.Genre)
                 .FirstOrDefaultAsync(x => x.Id == id);
 
             if (game == null)
@@ -73,6 +82,7 @@ public class GameService: IGameService
             return response;
         }
     }
+
     public async Task<Response<GameDto?>> CreateGameAsync(GameViewModel gameViewModel)
     {
         try
@@ -89,8 +99,25 @@ public class GameService: IGameService
             }
 
             var game = _mapper.Map<Game>(gameViewModel);
+
+            var gameGenres = new List<GameGenre>();
+            foreach (var genreId in gameViewModel.GenreIds)
+            {
+                var gameGenre = new GameGenre { Game = game, GenreId = genreId };
+                gameGenres.Add(gameGenre);
+            }
+
+            var gameMinSpecs = new List<GameMinSpecification>();
+            foreach (var minSpecId in gameViewModel.MinimumSpecificationIds)
+            {
+                var gameMinSpec = new GameMinSpecification { Game = game, MinimumSpecificationId = minSpecId };
+                gameMinSpecs.Add(gameMinSpec);
+            }
+
+            game.GameGenres = gameGenres;
+            game.GameMinSpecifications = gameMinSpecs;
             await _gameRepository.CreateAsync(game);
-            
+
             response.Status = HttpStatusCode.Created;
             response.Data = _mapper.Map<GameDto>(game);
             return response;
@@ -107,8 +134,12 @@ public class GameService: IGameService
         {
             var response = new Response<GameDto?>();
             var game = await _gameRepository.GetAll()
+                .Include(game => game.Publisher)
+                .Include(game => game.Developer)
+                .Include(game => game.GameMinSpecifications)
+                .Include(game => game.GameGenres)
                 .FirstOrDefaultAsync(x => x.Id == id);
-            
+
             if (game == null)
             {
                 response.Status = HttpStatusCode.NotFound;
@@ -135,7 +166,26 @@ public class GameService: IGameService
             game.AvatarName = gameViewModel.AvatarName;
 
             await _gameRepository.UpdateAsync(game);
-            
+
+            var gameGenres = new List<GameGenre>();
+            foreach (var genreId in gameViewModel.GenreIds)
+            {
+                var gameGenre = new GameGenre { GameId = id, GenreId = genreId };
+                gameGenres.Add(gameGenre);
+            }
+
+            var gameMinSpecs = new List<GameMinSpecification>();
+            foreach (var minSpecId in gameViewModel.MinimumSpecificationIds)
+            {
+                var gameMinSpec = new GameMinSpecification { GameId = id, MinimumSpecificationId = minSpecId };
+                gameMinSpecs.Add(gameMinSpec);
+            }
+
+            game.GameGenres = gameGenres;
+            game.GameMinSpecifications = gameMinSpecs;
+
+            await _gameRepository.UpdateAsync(game);
+
             response.Data = _mapper.Map<GameDto>(game);
             response.Status = HttpStatusCode.NoContent;
             return response;

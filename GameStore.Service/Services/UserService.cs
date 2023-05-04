@@ -10,6 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using GameStore.Domain.Constants;
 using GameStore.Domain.Helpers;
 using GameStore.Domain.ViewModels.Account;
 
@@ -45,15 +46,6 @@ namespace GameStore.Service.Services
             {
                 var response = Catcher.CatchError<List<User>, UserService>(exception, _logger);
                 return response;
-                // _logger.LogError(exception, exception.Message);
-                //
-                // var response = new Response<List<User>>()
-                // {
-                //     Message = "Ошибка произошла на сервере",
-                //     Status = HttpStatusCode.ServerError
-                // };
-                //
-                // return response;
             }
         }
         public async Task<Response<User?>> GetUserByIdAsync(int id)
@@ -83,15 +75,6 @@ namespace GameStore.Service.Services
             {
                 var response = Catcher.CatchError<User?, UserService>(exception, _logger);
                 return response;
-                // _logger.LogError(exception, exception.Message);
-                //
-                // var response = new Response<User?>()
-                // {
-                //     Message = "Ошибка произошла на сервере",
-                //     Status = HttpStatusCode.ServerError
-                // };
-                //
-                // return response;
             }
         }
         public async Task<Response<User?>> GetUserByLoginAsync(string login)
@@ -121,15 +104,6 @@ namespace GameStore.Service.Services
             {
                 var response = Catcher.CatchError<User?, UserService>(exception, _logger);
                 return response;
-                // _logger.LogError(exception, exception.Message);
-                //
-                // var response = new Response<User?>()
-                // {
-                //     Message = "Ошибка произошла на сервере",
-                //     Status = HttpStatusCode.ServerError
-                // };
-                //
-                // return response;
             }
         }
         public async Task<Response<bool>> CreateUserAsync(RegistrationViewModel viewModel)
@@ -160,16 +134,6 @@ namespace GameStore.Service.Services
             {
                 var response = Catcher.CatchError<bool, UserService>(exception, _logger);
                 return response;
-                // _logger.LogError(exception, exception.Message);
-                //
-                // var response = new Response<bool>()
-                // {
-                //     Data = false,
-                //     Message = "Ошибка произошла на сервере",
-                //     Status = HttpStatusCode.ServerError
-                // };
-
-                //return response;
             }
         }
         public async Task<Response<bool>> DeleteUserAsync(int id)
@@ -187,7 +151,7 @@ namespace GameStore.Service.Services
                 if (user == null)
                 {
                     response.Data = false;
-                    response.Message = "Пользователь не найден";
+                    response.Message = MessageResponse.NotFoundEntity;
                     response.Status = HttpStatusCode.NotFound;
                     return response;
                 }
@@ -200,34 +164,20 @@ namespace GameStore.Service.Services
             {
                 var response = Catcher.CatchError<bool, UserService>(exception, _logger);
                 return response;
-                // _logger.LogError(exception, exception.Message);
-                //
-                // var response = new Response<bool>()
-                // {
-                //     Data = false,
-                //     Message = "Ошибка произошла на сервере",
-                //     Status = HttpStatusCode.ServerError
-                // };
-                //
-                // return response;
             }
         }
         public async Task<Response<bool>> UpdateUserAsync(User user)
         {
             try
             {
-                var response = new Response<bool>()
-                {
-                    Status = HttpStatusCode.NoContent
-                };
-
+                var response = new Response<bool>();
                 var userForUpdate = await _repository.GetAll()
                     .FirstOrDefaultAsync(x => x.Id == user.Id);
 
                 if (userForUpdate == null)
                 {
                     response.Status = HttpStatusCode.NotFound;
-                    response.Message = "Пользователя с таким ID не существует";
+                    response.Message = MessageResponse.NotFoundEntity;
                     return response;
                 }
 
@@ -238,22 +188,13 @@ namespace GameStore.Service.Services
                 userForUpdate.Role = user.Role;
                 await _repository.UpdateAsync(userForUpdate);
 
+                response.Status = HttpStatusCode.NoContent;
                 return response;
             }
             catch (Exception exception)
             {
                 var response = Catcher.CatchError<bool, UserService>(exception, _logger);
                 return response;
-                // _logger.LogError(exception, exception.Message);
-                //
-                // var response = new Response<bool>()
-                // {
-                //     Data = false,
-                //     Message = "Ошибка произошла на сервере",
-                //     Status = HttpStatusCode.ServerError
-                // };
-                //
-                // return response;
             }
         }
         public string CreateToken(User user, AccessRole role)

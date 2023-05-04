@@ -1,20 +1,16 @@
 ﻿using GameStore.API.Extensions;
 using GameStore.Domain.Constants;
-using GameStore.Domain.Enums;
 using GameStore.Domain.Helpers;
 using GameStore.Domain.Models;
-using GameStore.Domain.Response;
 using GameStore.Domain.ViewModels.Image;
 using GameStore.Service.Interfaces;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Hosting;
 
 namespace GameStore.API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class ImagesController: ControllerBase
+public class ImagesController : ControllerBase
 {
     private readonly IImageService _imageService;
     private readonly ILogger<ImagesController> _logger;
@@ -30,7 +26,7 @@ public class ImagesController: ControllerBase
     }
 
     [HttpGet("{gameId}")]
-    
+
     public async Task<IActionResult> GetImages(int gameId)
     {
         try
@@ -38,9 +34,9 @@ public class ImagesController: ControllerBase
             var response = await _imageService.GetImagesAsync();
             return Ok(response);
         }
-        catch (Exception exception) 
-        { 
-            var response = Catcher.CatchError<List<Image>?, ImagesController>(exception, _logger); 
+        catch (Exception exception)
+        {
+            var response = Catcher.CatchError<List<Image>?, ImagesController>(exception, _logger);
             return StatusCode((int)response.Status, response);
         }
     }
@@ -58,19 +54,19 @@ public class ImagesController: ControllerBase
             {
                 ModelState.AddModelError("image", "Изображение должно быть в формате JPG");
             }
-            
+
             if (!ModelState.IsValid)
             {
                 var errors = ModelState.AllErrors();
                 return BadRequest(new { Message = MessageResponse.Invalid, Errors = errors });
             }
-            
+
             var responseWithGame = await _gameService.GetGameByIdAsync(gameId);
             if (responseWithGame.Data == null)
             {
                 return StatusCode((int)responseWithGame.Status, responseWithGame);
             }
-            
+
             var fileName = responseWithGame.Data.Name + "-" + DateTime.Now.ToString("yyyy-MM-dd") + ".jpg";
             var imageViewModel = new ImageViewModel()
             {
@@ -83,11 +79,11 @@ public class ImagesController: ControllerBase
             {
                 return StatusCode((int)response.Status, response);
             }
-    
+
             await SaveGameImage(gameId, fileName, image);
-            
+
             // возможно стоит просто возвращать ОК...
-            return CreatedAtAction(nameof(GetGameImage), new {gameId = gameId, fileName = fileName}, response);
+            return CreatedAtAction(nameof(GetGameImage), new { gameId = gameId, fileName = fileName }, response);
         }
         catch (Exception exception)
         {
@@ -117,7 +113,7 @@ public class ImagesController: ControllerBase
             return StatusCode((int)response.Status, response);
         }
     }
-    
+
     [HttpGet("images/{gameId:int}/{fileName}")]
     public async Task<IActionResult> GetGameImage(int gameId, string fileName)
     {
@@ -128,7 +124,7 @@ public class ImagesController: ControllerBase
             {
                 return NotFound();
             }
-            
+
             return PhysicalFile(fullPath, "image/jpg");
         }
         catch (Exception exception)
@@ -144,40 +140,40 @@ public class ImagesController: ControllerBase
         {
             var path = GetPathToGameImage(id);
             if (!Directory.Exists(path))
-            { 
+            {
                 Directory.CreateDirectory(path);
             }
-            
-            var fullPath = Path.Combine(path, fileName); 
+
+            var fullPath = Path.Combine(path, fileName);
             await using var stream = new FileStream(fullPath, FileMode.Create);
             await image.CopyToAsync(stream);
 
             return true;
         }
-        catch 
+        catch
         {
             return false;
         }
     }
 
     private async Task<bool> DeleteGameImage(int id, string fileName)
+    {
+        try
         {
-            try
+            var fullPath = Path.Combine(GetPathToGameImage(id), fileName);
+            if (System.IO.File.Exists(fullPath))
             {
-                var fullPath = Path.Combine(GetPathToGameImage(id), fileName);
-                if (System.IO.File.Exists(fullPath))
-                {
-                    System.IO.File.Delete(fullPath);
-                }
+                System.IO.File.Delete(fullPath);
+            }
 
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
+            return true;
         }
+        catch
+        {
+            return false;
+        }
+    }
 
-    private string GetPathToGameImage(int id) => 
+    private string GetPathToGameImage(int id) =>
         Path.Combine(_environment.WebRootPath, "images", $"{id}");
 }

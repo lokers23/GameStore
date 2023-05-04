@@ -13,13 +13,13 @@ using Microsoft.Extensions.Logging;
 
 namespace GameStore.Service.Services;
 
-public class OrderService: IOrderService
+public class OrderService : IOrderService
 {
     private readonly IRepository<Order> _orderRepository;
     private readonly IRepository<Key> _keyRepository;
     private readonly IMapper _mapper;
     private readonly ILogger<OrderService> _logger;
-    public OrderService(ILogger<OrderService> logger, IRepository<Order> orderRepository, 
+    public OrderService(ILogger<OrderService> logger, IRepository<Order> orderRepository,
         IRepository<Key> keyRepository, IMapper mapper)
     {
         _logger = logger;
@@ -38,7 +38,7 @@ public class OrderService: IOrderService
                     .ThenInclude(keyOrder => keyOrder.Key)
                 .Select(order => _mapper.Map<OrderDto>(order))
                 .ToListAsync();
-            
+
             response.Data = orders;
             response.Status = HttpStatusCode.Ok;
             return response;
@@ -77,7 +77,7 @@ public class OrderService: IOrderService
             return response;
         }
     }
-    public async Task<Response<OrderDto?>> CreateOrderAsync(OrderViewModel orderView, int userId)
+    public async Task<Response<OrderDto?>> CreateOrderAsync(OrderViewModel orderView, User user)
     {
         try
         {
@@ -85,39 +85,46 @@ public class OrderService: IOrderService
             var order = new Order()
             {
                 PayOn = DateTime.Now,
-                UserId = userId,
+                UserId = user.Id,
             };
-            
+
             var keys = new List<string?>();
             foreach (var gameId in orderView.GameIds)
             {
-                
+
                 var key = await _keyRepository.GetAll()
-                    .FirstOrDefaultAsync(key => 
+                    .Include(key => key.Game)
+                    .FirstOrDefaultAsync(key =>
                         key.GameId == gameId &&
                         key.IsUsed == false &&
                         !keys.Contains(key.Value));
-                
+
                 if (key == null)
                 {
-                    continue;
+                    break;
                 }
-                
+
                 var keyOrder = new KeyOrder { KeyId = key.Id, Order = order };
-                order.KeyOrders.Add(keyOrder); 
+                order.KeyOrders.Add(keyOrder);
+                order.Amount += key.Game.Price;
+
                 keys.Add(key.Value);
             }
 
             if (keys.Count != orderView.GameIds.Count)
             {
                 response.Status = HttpStatusCode.Conflict;
-                response.Errors = new Dictionary<string, string[]> {{"Key", new[] { "Не достаточно ключей" }}};
-                // надо будет с выводом сообщения о том что не хватает ключей
+                response.Errors = new Dictionary<string, string[]> { { "Key", new[] { "Не достаточно ключей" } } };
                 return response;
             }
-            
+
+            if (order.Amount > user.Balance)
+            {
+
+            }
+
             await _orderRepository.CreateAsync(order);
-            
+
             response.Status = HttpStatusCode.Created;
             response.Data = _mapper.Map<OrderDto>(order);
             return response;
@@ -129,6 +136,7 @@ public class OrderService: IOrderService
         }
     }
 
+    //
     public async Task<Response<OrderDto?>> UpdateOrderAsync(int id, OrderViewModel orderView)
     {
         try
@@ -144,19 +152,9 @@ public class OrderService: IOrderService
                 return response;
             }
 
-            // var responseExist = await CheckExistAsync(activationView, activation);
-            // if (responseExist.Data == true)
-            // {
-            //     response.Errors = responseExist.Errors;
-            //     response.Status = responseExist.Status;
-            //     response.Message = responseExist.Message;
-            //
-            //     return response;
-            // }
-
             //order.Name = orderView.Name;
             await _orderRepository.UpdateAsync(order);
-            
+
             response.Data = _mapper.Map<OrderDto>(order);
             response.Status = HttpStatusCode.NoContent;
             return response;

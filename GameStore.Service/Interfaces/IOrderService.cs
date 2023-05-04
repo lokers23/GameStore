@@ -1,4 +1,6 @@
 ﻿using GameStore.Domain.Dto.Order;
+using GameStore.Domain.Dto.User;
+using GameStore.Domain.Models;
 using GameStore.Domain.Response;
 using GameStore.Domain.ViewModels.Activation;
 using GameStore.Domain.ViewModels.Order;
@@ -9,7 +11,7 @@ public interface IOrderService
 {
     Task<Response<List<OrderDto>?>> GetOrdersAsync();
     Task<Response<OrderDto?>> GetOrderByIdAsync(int id);
-    Task<Response<OrderDto?>> CreateOrderAsync(OrderViewModel orderView, int userId);
+    Task<Response<OrderDto?>> CreateOrderAsync(OrderViewModel orderView, User user);
     Task<Response<OrderDto?>> UpdateOrderAsync(int id, OrderViewModel orderView);
     Task<Response<bool?>> DeleteOrderAsync(int id);
     Task<Response<bool>> CheckExistAsync(OrderViewModel activationView, int id);

@@ -1,25 +1,24 @@
 ﻿using AutoMapper;
 using GameStore.DAL.Interfaces;
 using GameStore.Domain.Constants;
-using GameStore.Domain.Dto.Publisher;
+using GameStore.Domain.Dto.Activation;
 using GameStore.Domain.Enums;
 using GameStore.Domain.Helpers;
 using GameStore.Domain.Models;
 using GameStore.Domain.Response;
 using GameStore.Domain.ViewModels.Activation;
-using GameStore.Domain.ViewModels.Developer;
 using GameStore.Service.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace GameStore.Service.Services;
 
-public class ActivationService: IActivationService
+public class ActivationService : IActivationService
 {
     private readonly IRepository<Activation> _activationRepository;
     private readonly IMapper _mapper;
     private readonly ILogger<ActivationService> _logger;
-    public ActivationService(ILogger<ActivationService> logger, IRepository<Activation> activationRepository, 
+    public ActivationService(ILogger<ActivationService> logger, IRepository<Activation> activationRepository,
         IMapper mapper)
     {
         _logger = logger;
@@ -34,7 +33,7 @@ public class ActivationService: IActivationService
             var activations = await _activationRepository.GetAll()
                 .Select(activation => _mapper.Map<ActivationDto>(activation))
                 .ToListAsync();
-            
+
             response.Data = activations;
             response.Status = HttpStatusCode.Ok;
             return response;
@@ -86,7 +85,7 @@ public class ActivationService: IActivationService
 
             var activation = _mapper.Map<Activation>(activationView);
             await _activationRepository.CreateAsync(activation);
-            
+
             response.Status = HttpStatusCode.Created;
             response.Message = MessageResponse.SuccessCreatedGenre;
             response.Data = _mapper.Map<ActivationDto>(activation);
@@ -124,7 +123,7 @@ public class ActivationService: IActivationService
 
             activation.Name = activationView.Name;
             await _activationRepository.UpdateAsync(activation);
-            
+
             response.Data = _mapper.Map<ActivationDto>(activation);
             response.Status = HttpStatusCode.NoContent;
             return response;
@@ -170,10 +169,10 @@ public class ActivationService: IActivationService
             Errors = new Dictionary<string, string[]>()
         };
 
-        var isExist = await _activationRepository.GetAll().AnyAsync(m => 
+        var isExist = await _activationRepository.GetAll().AnyAsync(m =>
             m.Id != id &&
             m.Name.Equals(activationView.Name));
-        
+
         if (isExist)
         {
             response.Status = HttpStatusCode.Conflict;

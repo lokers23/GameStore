@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using GameStore.DAL.Interfaces;
 using GameStore.Domain.Constants;
-using GameStore.Domain.Dto.Publisher;
+using GameStore.Domain.Dto.Developer;
 using GameStore.Domain.Enums;
 using GameStore.Domain.Helpers;
 using GameStore.Domain.Models;
@@ -33,7 +33,7 @@ namespace GameStore.Service.Services
                 var developers = await _developerRepository.GetAll()
                     .Select(developer => _mapper.Map<DeveloperDto>(developer))
                     .ToListAsync();
-                
+
                 response.Data = developers;
                 response.Status = HttpStatusCode.Ok;
                 return response;
@@ -86,7 +86,7 @@ namespace GameStore.Service.Services
 
                 var developer = _mapper.Map<Developer>(developerView);
                 await _developerRepository.CreateAsync(developer);
-                
+
                 response.Status = HttpStatusCode.Created;
                 response.Data = _mapper.Map<DeveloperDto>(developer);
                 return response;
@@ -123,7 +123,7 @@ namespace GameStore.Service.Services
 
                 developer.Name = developerView.Name;
                 await _developerRepository.UpdateAsync(developer);
-                
+
                 response.Data = _mapper.Map<DeveloperDto>(developer);
                 response.Status = HttpStatusCode.NoContent;
                 return response;
@@ -168,10 +168,10 @@ namespace GameStore.Service.Services
                 Errors = new Dictionary<string, string[]>()
             };
 
-            var isExist = await _developerRepository.GetAll().AnyAsync(m => 
+            var isExist = await _developerRepository.GetAll().AnyAsync(m =>
                 m.Id != id &&
                 m.Name.Equals(developerView.Name));
-        
+
             if (isExist)
             {
                 response.Status = HttpStatusCode.Conflict;

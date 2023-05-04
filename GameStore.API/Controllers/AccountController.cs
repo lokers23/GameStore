@@ -1,5 +1,6 @@
 ﻿using GameStore.API.Extensions;
 using GameStore.API.Helpers;
+using GameStore.Domain.Constants;
 using GameStore.Domain.Enums;
 using GameStore.Domain.Helpers;
 using GameStore.Domain.Response;
@@ -85,7 +86,6 @@ namespace GameStore.API.Controllers
                     response.Status = HttpStatusCode.ValidationError;
                     response.Message = "Ошибка валидации";
                     response.Errors = ModelState.AllErrors();
-
                     return BadRequest(response);
                 }
 

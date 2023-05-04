@@ -27,4 +27,12 @@ public class GameViewModel
     public string? VideoUrl { get; set; }
     
     public string? AvatarName { get; set; }
+
+    [Required(ErrorMessage = "Укажите жанры")]
+    [MinLength(1)]
+    public List<int> GenreIds { get; set; }
+
+    [Required(ErrorMessage = "Укажите минимальную спецификацию")]
+    [MinLength(1)]
+    public List<int> MinimumSpecificationIds { get; set; }
 }

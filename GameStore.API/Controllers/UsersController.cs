@@ -31,4 +31,19 @@ public class UsersController: ControllerBase
             return StatusCode((int)response.Status, response);
         }
     }
+
+    [HttpDelete("id")]
+    public async Task<IActionResult> DeleteUser(int id)
+    {
+        try
+        {
+            var response = await _userService.DeleteUserAsync(id);
+            return Ok(response);
+        }
+        catch (Exception exception)
+        {
+            var response = Catcher.CatchError<List<User>?, UsersController>(exception, _logger);
+            return StatusCode((int)response.Status, response);
+        }
+    }
 }

@@ -1,5 +1,4 @@
-﻿using GameStore.Domain.Dto.Publisher;
-using GameStore.Domain.Models;
+﻿using GameStore.Domain.Dto.Developer;
 using GameStore.Domain.Response;
 using GameStore.Domain.ViewModels.Developer;
 

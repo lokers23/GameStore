@@ -1,4 +1,4 @@
-﻿namespace GameStore.Domain.Dto.Publisher;
+﻿namespace GameStore.Domain.Dto.Activation;
 
 public class ActivationDto
 {
