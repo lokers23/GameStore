@@ -8,7 +8,7 @@ namespace GameStore.Service.Interfaces
 {
     public interface IImageService
     {
-        public Task<Response<List<ImageDto>?>> GetImagesAsync();
+        public Task<Response<List<ImageDto>?>> GetImagesAsync(int gameId);
         public Task<Response<ImageDto?>> GetImageByIdAsync(int id);
         public Task<Response<ImageDto?>> CreateImageAsync(ImageViewModel imageViewModel);
         public Task<Response<ImageDto?>> UpdateImageAsync(int id, ImageViewModel imageViewModel);

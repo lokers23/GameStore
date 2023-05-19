@@ -9,7 +9,7 @@ namespace GameStore.Service.Interfaces;
 
 public interface IOrderService
 {
-    Task<Response<List<OrderDto>?>> GetOrdersAsync();
+    Task<Response<List<OrderDto>?>> GetOrdersAsync(int? userId = null);
     Task<Response<OrderDto?>> GetOrderByIdAsync(int id);
     Task<Response<OrderDto?>> CreateOrderAsync(OrderViewModel orderView, User user);
     Task<Response<OrderDto?>> UpdateOrderAsync(int id, OrderViewModel orderView);

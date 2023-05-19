@@ -5,6 +5,7 @@ using GameStore.Domain.Helpers;
 using GameStore.Domain.Models;
 using GameStore.Domain.ViewModels.Game;
 using GameStore.Service.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GameStore.API.Controllers;
@@ -34,6 +35,7 @@ public class GamesController : ControllerBase
     }
 
     [HttpGet]
+    
     public async Task<IActionResult> GetGames()
     {
         try
@@ -118,11 +120,11 @@ public class GamesController : ControllerBase
     {
         try
         {
-            if (avatar == null)
+            if (gameViewModel.isChangedAvatar && avatar == null)
             {
                 ModelState.AddModelError("Avatar", "Укажите изображение");
             }
-            else if (!avatar.ContentType.Equals("image/jpeg"))
+            else if (gameViewModel.isChangedAvatar && !avatar.ContentType.Equals("image/jpeg"))
             {
                 ModelState.AddModelError("Avatar", "Изображение должно быть в формате JPG");
             }
@@ -133,7 +135,7 @@ public class GamesController : ControllerBase
                 return BadRequest(new { Message = MessageResponse.Invalid, Errors = errors });
             }
 
-            var errorsExistence = CheckExistsEntities(gameViewModel);
+            var errorsExistence = await CheckExistsEntities(gameViewModel);
             if (errorsExistence != null)
             {
                 return BadRequest(new { Message = MessageResponse.Invalid, Errors = errorsExistence });
@@ -142,16 +144,23 @@ public class GamesController : ControllerBase
             var responseWithGame = await _gameService.GetGameByIdAsync(id);
             var fileNameForDelete = responseWithGame.Data.AvatarName;
 
-            var fileName = gameViewModel.Name + "-" + DateTime.Now.ToString("yyyy-MM-dd") + ".jpg";
-            gameViewModel.AvatarName = fileName;
+            // думаю эту логику нужно вынести в сервис и проверять там меняем ли мы аватарку
+            //var fileName = gameViewModel.Name + "-" + DateTime.Now.ToString("yyyy-MM-dd") + ".jpg";
+            //gameViewModel.AvatarName = fileName;
+
             var response = await _gameService.UpdateGameAsync(id, gameViewModel);
             if ((int)response.Status >= 300)
             {
                 return StatusCode((int)response.Status, response);
             }
 
-            await DeleteAvatarImage(fileNameForDelete!);
-            await SaveAvatarImage(fileName, avatar);
+            if (gameViewModel.isChangedAvatar)
+            {
+                await DeleteAvatarImage(fileNameForDelete);
+                //await SaveAvatarImage(fileName, avatar);
+                await SaveAvatarImage(response.Data.AvatarName, avatar);
+            }
+            
 
             return NoContent();
         }

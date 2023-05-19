@@ -171,10 +171,21 @@ public class KeyService: IKeyService
     {
         try
         {
-            foreach (var key in keys.Select(keyDto => _mapper.Map<Key>(keyDto)))
+            //foreach (var key in keys.Select(keyDto => _mapper.Map<Key>(keyDto)))
+            //{
+
+            //    key.IsUsed = true;
+            //    await _keyRepository.UpdateAsync(key);
+            //}
+
+            foreach (var keyDto in keys)
             {
-                key.IsUsed = true;
-                await _keyRepository.UpdateAsync(key);
+                var key = await _keyRepository.GetAll().FirstOrDefaultAsync(key => key.Id == keyDto.Id);
+                if (key != null)
+                {
+                    key.IsUsed = true;
+                    await _keyRepository.UpdateAsync(key);
+                }
             }
 
             return true;

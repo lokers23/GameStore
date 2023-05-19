@@ -1,8 +1,10 @@
 ﻿using GameStore.API.Extensions;
 using GameStore.Domain.Constants;
+using GameStore.Domain.Dto.Order;
 using GameStore.Domain.Enums;
 using GameStore.Domain.Helpers;
 using GameStore.Domain.Models;
+using GameStore.Domain.Response;
 using GameStore.Domain.ViewModels.Order;
 using GameStore.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -35,12 +37,31 @@ namespace GameStore.API.Controllers
         {
             try
             {
-                var response = await _orderService.GetOrdersAsync();
+                var claimsIdentity = User.Identity as ClaimsIdentity;
+                var success = int.TryParse(claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId);
+                var user = await _userService.GetUserByIdAsync(userId);
+                if (user.Status == HttpStatusCode.NotFound)
+                {
+                    return StatusCode((int)user.Status, user);
+                }
+
+                var role = claimsIdentity.FindFirst(ClaimTypes.Role)?.Value;
+                Response<List<OrderDto>> response;
+
+                if (role == AccessRole.User.ToString())
+                {
+                    response = await _orderService.GetOrdersAsync(userId);
+                }
+                else
+                {
+                    response = await _orderService.GetOrdersAsync();
+                }
+                
                 return Ok(response);
             }
             catch (Exception exception)
             {
-                var response = Catcher.CatchError<List<Order>?, OrdersController>(exception, _logger);
+                var response = Catcher.CatchError<List<OrderDto>?, OrdersController>(exception, _logger);
                 return StatusCode((int)response.Status, response);
             }
         }

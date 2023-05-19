@@ -63,5 +63,11 @@ public class AutoMapperProfile: Profile
             .ForMember(dest => dest.MinimumSpecifications,
                 opt => opt.MapFrom(src => src.GameMinSpecifications.Select(ko => ko.MinimumSpecification)));
         #endregion
+
+        #region DtoToModel
+        CreateMap<KeyDto, Key>();
+        CreateMap<GameDto, Game>();
+        CreateMap<ActivationDto, Activation>();
+        #endregion
     }
 }

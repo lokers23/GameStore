@@ -24,13 +24,14 @@ public class ImageService: IImageService
         _imageRepository = imageRepository;
         _mapper = mapper;
     }
-    public async Task<Response<List<ImageDto>?>> GetImagesAsync()
+    public async Task<Response<List<ImageDto>?>> GetImagesAsync(int gameId)
     {
         try
         {
             var response = new Response<List<ImageDto>?>();
             var images = await _imageRepository.GetAll()
                 .Include(image => image.Game)
+                .Where(image => image.GameId == gameId)
                 .Select(image => _mapper.Map<ImageDto>(image))
                 .ToListAsync();
             

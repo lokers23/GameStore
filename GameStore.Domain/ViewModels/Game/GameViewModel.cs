@@ -28,6 +28,8 @@ public class GameViewModel
     
     public string? AvatarName { get; set; }
 
+    public bool isChangedAvatar { get; set; } = true;
+
     [Required(ErrorMessage = "Укажите жанры")]
     [MinLength(1)]
     public List<int> GenreIds { get; set; }

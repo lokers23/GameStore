@@ -163,8 +163,12 @@ public class GameService : IGameService
             game.ReleaseOn = gameViewModel.ReleaseOn ?? DateTime.Now;
             game.Price = gameViewModel.Price ?? 0.0m;
             game.VideoUrl = gameViewModel.VideoUrl;
-            game.AvatarName = gameViewModel.AvatarName;
-
+            //game.AvatarName = gameViewModel.AvatarName;
+            if (gameViewModel.isChangedAvatar)
+            {
+                game.AvatarName =  $"{gameViewModel.Name}-{DateTime.Now:yyyy-MM-dd}.jpg";
+            }
+            
             await _gameRepository.UpdateAsync(game);
 
             var gameGenres = new List<GameGenre>();
@@ -234,8 +238,8 @@ public class GameService : IGameService
                 game.Id != id &&
                 game.Name.Equals(gameViewModel.Name) &&
                 game.DeveloperId == gameViewModel.DeveloperId &&
-                game.PublisherId == gameViewModel.PublisherId &&
-                game.ReleaseOn == gameViewModel.ReleaseOn);
+                game.PublisherId == gameViewModel.PublisherId);
+                //game.ReleaseOn == gameViewModel.ReleaseOn);
 
         if (isExist)
         {

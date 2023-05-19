@@ -31,7 +31,7 @@ public class ImagesController : ControllerBase
     {
         try
         {
-            var response = await _imageService.GetImagesAsync();
+            var response = await _imageService.GetImagesAsync(gameId);
             return Ok(response);
         }
         catch (Exception exception)
@@ -41,7 +41,7 @@ public class ImagesController : ControllerBase
         }
     }
 
-    [HttpPost]
+    [HttpPost("{gameId}")]
     public async Task<IActionResult> CreateImage(int gameId, [FromForm] IFormFile? image)
     {
         try
@@ -67,7 +67,7 @@ public class ImagesController : ControllerBase
                 return StatusCode((int)responseWithGame.Status, responseWithGame);
             }
 
-            var fileName = responseWithGame.Data.Name + "-" + DateTime.Now.ToString("yyyy-MM-dd") + ".jpg";
+            var fileName = responseWithGame.Data.Name + "-" + DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss") + ".jpg";
             var imageViewModel = new ImageViewModel()
             {
                 GameId = gameId,
@@ -92,7 +92,7 @@ public class ImagesController : ControllerBase
         }
     }
 
-    [HttpDelete]
+    [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteImage(int id)
     {
         try
@@ -114,7 +114,7 @@ public class ImagesController : ControllerBase
         }
     }
 
-    [HttpGet("images/{gameId:int}/{fileName}")]
+    [HttpGet("{gameId:int}/{fileName}")]
     public async Task<IActionResult> GetGameImage(int gameId, string fileName)
     {
         try
