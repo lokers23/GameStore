@@ -40,6 +40,7 @@ public class GamesController : ControllerBase
     {
         try
         {
+            
             var response = await _gameService.GetGamesAsync();
             return Ok(response);
         }
