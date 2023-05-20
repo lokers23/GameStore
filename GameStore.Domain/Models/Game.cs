@@ -16,6 +16,7 @@ namespace GameStore.Domain.Models
         public string Name { get; set; }
         public int? DeveloperId { get; set; }
         public int? PublisherId { get; set; }
+        public int? ActivationId { get; set; }
         public DateTime ReleaseOn { get; set; }
         public string Description { get; set; }
         public decimal Price { get; set; }
@@ -24,6 +25,7 @@ namespace GameStore.Domain.Models
 
         public virtual Developer Developer { get; set; }
         public virtual Publisher Publisher { get; set; }
+        public virtual Activation Activation { get; set; }
         public virtual ICollection<GameMinSpecification> GameMinSpecifications { get; set; }
         public virtual ICollection<GameGenre> GameGenres { get; set; }
         public virtual ICollection<Key> Keys { get; set; }

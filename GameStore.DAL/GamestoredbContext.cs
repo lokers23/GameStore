@@ -91,7 +91,7 @@ namespace GameStore.DAL
                     ;
 
                 entity.HasIndex(e => e.PublisherId, "publisher_id");
-                
+                entity.HasIndex(e => e.ActivationId, "activation_id");
                 entity.Property(e => e.Id)
                     .HasColumnType("int")
                     .HasColumnName("id");
@@ -124,6 +124,12 @@ namespace GameStore.DAL
                     .HasColumnName("publisher_id")
                     .HasDefaultValueSql("NULL");
 
+                //////
+                entity.Property(e => e.ActivationId)
+                    .HasColumnType("int")
+                    .HasColumnName("activation_id")
+                    .HasDefaultValueSql("NULL");
+
                 entity.Property(e => e.ReleaseOn)
                     .HasColumnType("date")
                     .HasColumnName("release_on");
@@ -144,6 +150,13 @@ namespace GameStore.DAL
                     .HasForeignKey(d => d.PublisherId)
                     .OnDelete(DeleteBehavior.SetNull)
                     .HasConstraintName("FK_game_publisher_id");
+
+                ///////
+                entity.HasOne(d => d.Activation)
+                    .WithMany(p => p.Games)
+                    .HasForeignKey(d => d.ActivationId)
+                    .OnDelete(DeleteBehavior.SetNull)
+                    .HasConstraintName("FK_game_activation_id");
             });
 
             modelBuilder.Entity<GameGenre>(entity =>
@@ -273,7 +286,7 @@ namespace GameStore.DAL
 
                 entity.HasIndex(e => e.GameId, "game_id");
 
-                entity.HasIndex(e => e.ActivationId, "activation_id");
+                //entity.HasIndex(e => e.ActivationId, "activation_id");
 
                 entity.HasIndex(e => e.Value, "value")
                     .IsUnique();
@@ -282,10 +295,10 @@ namespace GameStore.DAL
                     .HasColumnType("int")
                     .HasColumnName("id");
 
-                entity.Property(e => e.ActivationId)
-                    .HasColumnType("int")
-                    .HasColumnName("activation_id")
-                    .HasDefaultValueSql("NULL");
+                //entity.Property(e => e.ActivationId)
+                //    .HasColumnType("int")
+                //    .HasColumnName("activation_id")
+                //    .HasDefaultValueSql("NULL");
 
                 entity.Property(e => e.GameId)
                     .HasColumnType("int")
@@ -299,11 +312,11 @@ namespace GameStore.DAL
                     .HasMaxLength(100)
                     .HasColumnName("value");
 
-                entity.HasOne(d => d.Activation)
-                    .WithMany(p => p.Keys)
-                    .HasForeignKey(d => d.ActivationId)
-                    .OnDelete(DeleteBehavior.SetNull)
-                    .HasConstraintName("FK_key_activation_id");
+                //entity.HasOne(d => d.Activation)
+                //    .WithMany(p => p.Keys)
+                //    .HasForeignKey(d => d.ActivationId)
+                //    .OnDelete(DeleteBehavior.SetNull)
+                //    .HasConstraintName("FK_key_activation_id");
 
                 entity.HasOne(d => d.Game)
                     .WithMany(p => p.Keys)

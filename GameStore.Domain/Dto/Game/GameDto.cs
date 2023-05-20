@@ -1,4 +1,5 @@
-﻿using GameStore.Domain.Dto.Developer;
+﻿using GameStore.Domain.Dto.Activation;
+using GameStore.Domain.Dto.Developer;
 using GameStore.Domain.Dto.Genre;
 using GameStore.Domain.Dto.MinimumSpecification;
 using GameStore.Domain.Dto.Publisher;
@@ -11,6 +12,7 @@ public class GameDto
     public string? Name { get; set; }
     public DeveloperDto? Developer { get; set; }
     public PublisherDto? Publisher { get; set; }
+    public ActivationDto? Activation { get; set; }
     public DateTime? ReleaseOn { get; set; }
     public string? Description { get; set; }
     public decimal? Price { get; set; }

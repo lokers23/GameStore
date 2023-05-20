@@ -31,7 +31,7 @@ public class KeyService: IKeyService
             var response = new Response<List<KeyDto>?>();
             var keys = await _keyRepository.GetAll()
                 .Include(key => key.Game)
-                .Include(key => key.Activation)
+                //.Include(key => key.Activation)
                 .Select(key => _mapper.Map<KeyDto>(key))
                 .ToListAsync();
             
@@ -52,7 +52,7 @@ public class KeyService: IKeyService
             var response = new Response<KeyDto?>();
             var key = await _keyRepository.GetAll()
                 .Include(key => key.Game)
-                .Include(key => key.Activation)
+                //.Include(key => key.Activation)
                 .FirstOrDefaultAsync(x => x.Id == id);
 
             if (key == null)
@@ -125,7 +125,7 @@ public class KeyService: IKeyService
             }
 
             key.Value = keyViewModel.Value;
-            key.ActivationId = keyViewModel.ActivationId;
+            //key.ActivationId = keyViewModel.ActivationId;
             key.GameId = keyViewModel.GameId;
             key.IsUsed = keyViewModel.IsUsed!.Value;
             await _keyRepository.UpdateAsync(key);

@@ -32,6 +32,7 @@ public class GameService : IGameService
             var games = await _gameRepository.GetAll()
                 .Include(game => game.Publisher)
                 .Include(game => game.Developer)
+                .Include((game => game.Activation))
                 .Include(game => game.GameMinSpecifications)
                     .ThenInclude(gm => gm.MinimumSpecification)
                         .ThenInclude(ms => ms.Platform)
@@ -58,6 +59,7 @@ public class GameService : IGameService
             var game = await _gameRepository.GetAll()
                 .Include(game => game.Publisher)
                 .Include(game => game.Developer)
+                .Include((game => game.Activation))
                 .Include(game => game.GameMinSpecifications)
                     .ThenInclude(gm => gm.MinimumSpecification)
                         .ThenInclude(ms => ms.Platform)
@@ -136,6 +138,7 @@ public class GameService : IGameService
             var game = await _gameRepository.GetAll()
                 .Include(game => game.Publisher)
                 .Include(game => game.Developer)
+                .Include((game => game.Activation))
                 .Include(game => game.GameMinSpecifications)
                 .Include(game => game.GameGenres)
                 .FirstOrDefaultAsync(x => x.Id == id);
@@ -159,6 +162,7 @@ public class GameService : IGameService
             game.Name = gameViewModel.Name;
             game.DeveloperId = gameViewModel.DeveloperId;
             game.PublisherId = gameViewModel.PublisherId;
+            game.ActivationId = gameViewModel.ActivationId;
             game.Description = gameViewModel.Description;
             game.ReleaseOn = gameViewModel.ReleaseOn ?? DateTime.Now;
             game.Price = gameViewModel.Price ?? 0.0m;

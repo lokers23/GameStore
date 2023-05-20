@@ -7,10 +7,10 @@ namespace GameStore.Domain.Models
         public int Id { get; set; }
         public string Value { get; set; }
         public int? GameId { get; set; }
-        public int? ActivationId { get; set; }
+        //public int? ActivationId { get; set; }
         public bool IsUsed { get; set; }
 
-        public virtual Activation Activation { get; set; }
+        //public virtual Activation Activation { get; set; }
         public virtual Game Game { get; set; }
         public virtual ICollection<KeyOrder> KeyOrders { get; set; }
     }

@@ -11,8 +11,8 @@ public class KeyViewModel
     [Required(ErrorMessage = "Выберите игру")]
     public int? GameId { get; set; }
     
-    [Required(ErrorMessage = "Выберите платформу для активации ключа")]
-    public int? ActivationId { get; set; }
+    //[Required(ErrorMessage = "Выберите платформу для активации ключа")]
+    //public int? ActivationId { get; set; }
     
     [Required(ErrorMessage = "Выберите платформу")]
     public bool? IsUsed { get; set; }

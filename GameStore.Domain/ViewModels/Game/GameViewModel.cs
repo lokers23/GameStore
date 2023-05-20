@@ -13,7 +13,10 @@ public class GameViewModel
     
     [Required(ErrorMessage = "Укажите издателя")]
     public int? PublisherId { get; set; }
-    
+
+    [Required(ErrorMessage = "Выберите платформу для активации ключа")]
+    public int? ActivationId { get; set; }
+
     [Required(ErrorMessage = "Укажите дату выпуска")]
     public DateTime? ReleaseOn { get; set; }
     
