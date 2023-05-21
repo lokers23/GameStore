@@ -7,11 +7,12 @@ namespace GameStore.Service.Interfaces;
 
 public interface IKeyService
 {
-    Task<Response<List<KeyDto>?>> GetKeysAsync();
+    Task<Response<List<KeyDto>?>> GetKeysAsync(int? gameId = null);
     Task<Response<KeyDto?>> GetKeyByIdAsync(int id);
     Task<Response<KeyDto?>> CreateKeyAsync(KeyViewModel keyViewModel);
     Task<Response<KeyDto?>> UpdateKeyAsync(int id, KeyViewModel keyViewModel);
     Task<Response<bool?>> DeleteKeyAsync(int id);
     Task<bool> MarkUsedKeysAsync(List<KeyDto> keys);
+    Task<Response<int?>> GetNumberOfKeys(int gameId);
     Task<Response<bool>> CheckExistAsync(KeyViewModel keyViewModel, int id);
 }

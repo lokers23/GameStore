@@ -46,6 +46,7 @@ builder.Services.AddScoped<IActivationService, ActivationService>();
 builder.Services.AddScoped<IGameService, GameService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IKeyService, KeyService>();
+builder.Services.AddScoped<IBalanceService, BalanceService>();
 #endregion
 
 #region Services for add to scope repository

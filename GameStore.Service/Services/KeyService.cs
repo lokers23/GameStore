@@ -24,14 +24,14 @@ public class KeyService: IKeyService
         _keyRepository = keyRepository;
         _mapper = mapper;
     }
-    public async Task<Response<List<KeyDto>?>> GetKeysAsync()
+    public async Task<Response<List<KeyDto>?>> GetKeysAsync(int? gameId)
     {
         try
         {
             var response = new Response<List<KeyDto>?>();
             var keys = await _keyRepository.GetAll()
                 .Include(key => key.Game)
-                //.Include(key => key.Activation)
+                .Where(key => !gameId.HasValue || key.GameId == gameId)
                 .Select(key => _mapper.Map<KeyDto>(key))
                 .ToListAsync();
             
@@ -52,7 +52,6 @@ public class KeyService: IKeyService
             var response = new Response<KeyDto?>();
             var key = await _keyRepository.GetAll()
                 .Include(key => key.Game)
-                //.Include(key => key.Activation)
                 .FirstOrDefaultAsync(x => x.Id == id);
 
             if (key == null)
@@ -145,17 +144,17 @@ public class KeyService: IKeyService
         try
         {
             var response = new Response<bool?>();
-            var activation = await _keyRepository.GetAll()
+            var key = await _keyRepository.GetAll()
                 .FirstOrDefaultAsync(x => x.Id == id);
 
-            if (activation == null)
+            if (key == null)
             {
                 response.Status = HttpStatusCode.NotFound;
                 response.Message = MessageResponse.NotFoundEntity;
                 return response;
             }
 
-            await _keyRepository.DeleteAsync(activation);
+            await _keyRepository.DeleteAsync(key);
 
             response.Status = HttpStatusCode.NoContent;
             return response;
@@ -167,6 +166,25 @@ public class KeyService: IKeyService
         }
     }
 
+    public async Task<Response<int?>> GetNumberOfKeys(int gameId)
+    {
+        try
+        {
+            var response = new Response<int?>();
+            var numberOfKeys = await _keyRepository
+                .GetAll()
+                .CountAsync(key => !key.IsUsed && key.GameId == gameId);
+
+            response.Data = numberOfKeys;
+            return response;
+        }
+        catch (Exception exception)
+        {
+            var response = Catcher.CatchError<int?, KeyService>(exception, _logger);
+            return response;
+        }
+    }
+    
     public async Task<bool> MarkUsedKeysAsync(List<KeyDto> keys)
     {
         try

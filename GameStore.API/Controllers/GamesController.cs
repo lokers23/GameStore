@@ -19,17 +19,19 @@ public class GamesController : ControllerBase
     private readonly IPublisherService _publisherService;
     private readonly IMinSpecificationService _minSpecificationService;
     private readonly IGenreService _genreService;
+    private readonly IKeyService _keyService;
     private readonly ILogger<GamesController> _logger;
     private readonly IWebHostEnvironment _environment;
 
     public GamesController(IGameService gameService, IDeveloperService developerService, IPublisherService publisherService, 
-        IMinSpecificationService minSpecificationService, IGenreService genreService, ILogger<GamesController> logger, IWebHostEnvironment environment)
+        IMinSpecificationService minSpecificationService, IGenreService genreService, IKeyService keyService, ILogger<GamesController> logger, IWebHostEnvironment environment)
     {
         _gameService = gameService;
         _developerService = developerService;
         _publisherService = publisherService;
         _minSpecificationService = minSpecificationService;
         _genreService = genreService;
+        _keyService = keyService;
         _logger = logger;
         _environment = environment;
     }
@@ -196,6 +198,21 @@ public class GamesController : ControllerBase
         }
     }
 
+    [HttpGet("{id:int}/count")]
+    public async Task<IActionResult> GetNumberOfKeysAvailable(int id)
+    {
+        try
+        {
+            var response = await _keyService.GetNumberOfKeys(id);
+            return Ok(response);
+        }
+        catch (Exception exception)
+        {
+            var response = Catcher.CatchError<string?, GamesController>(exception, _logger);
+            return StatusCode((int)response.Status, response);
+        }
+    }
+    
     [HttpGet("avatars/{fileName}")]
     public async Task<IActionResult> GetAvatarImage(string fileName)
     {
