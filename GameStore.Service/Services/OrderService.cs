@@ -40,7 +40,7 @@ public class OrderService : IOrderService
                 .Include(order => order.KeyOrders)
                     .ThenInclude(keyOrder => keyOrder.Key)
                         .ThenInclude(key => key.Game)
-                .Where(g=>g.User.Id == userId)
+                .Where(g=> !userId.HasValue || g.User.Id == userId)
                 .Select(order => _mapper.Map<OrderDto>(order))
                 .ToListAsync();
 
@@ -108,8 +108,8 @@ public class OrderService : IOrderService
                     return response;
                 }
 
-                var notUsedKeys = game.Keys;
-                var countNotUsedKeys= notUsedKeys.Count(key => !key.IsUsed);
+                var notUsedKeys = game.Keys.Where(key => !key.IsUsed);
+                var countNotUsedKeys= notUsedKeys.Count();
                 if (countNotUsedKeys < gameCount.Count)
                 {
                     response.Status = HttpStatusCode.Conflict;

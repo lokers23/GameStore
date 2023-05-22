@@ -94,7 +94,7 @@ namespace GameStore.API.Controllers
                     !AccountHelper.CheckCorrectPassword(user.Data, loginModel.Password, user.Data.Login))
                 {
                     ModelState.AddModelError("singin", "Неверный логин или пароль");
-                    response.Status = HttpStatusCode.AuthorizeError;
+                    response.Status = HttpStatusCode.ValidationError;//HttpStatusCode.AuthorizeError;
                     response.Message = "Ошибка входа в аккаунт";
                     response.Errors = ModelState.AllErrors();
 

@@ -9,6 +9,7 @@ using GameStore.Domain.ViewModels.Order;
 using GameStore.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GameStore.API.Controllers
 {
@@ -32,8 +33,9 @@ namespace GameStore.API.Controllers
             _logger = logger;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetOrders()
+        [HttpGet("user")]
+        [Authorize]
+        public async Task<IActionResult> GetOrdersByUser()
         {
             try
             {
@@ -46,17 +48,25 @@ namespace GameStore.API.Controllers
                 }
 
                 var role = claimsIdentity.FindFirst(ClaimTypes.Role)?.Value;
+                Response<List<OrderDto>> response; 
+                response = await _orderService.GetOrdersAsync(userId);
+                return Ok(response);
+            }
+            catch (Exception exception)
+            {
+                var response = Catcher.CatchError<List<OrderDto>?, OrdersController>(exception, _logger);
+                return StatusCode((int)response.Status, response);
+            }
+        }
+        [HttpGet]
+        [Authorize(nameof(AccessRole.Moderator))]
+        public async Task<IActionResult> GetOrders()
+        {
+            try
+            {
                 Response<List<OrderDto>> response;
+                response = await _orderService.GetOrdersAsync();
 
-                if (role == AccessRole.User.ToString())
-                {
-                    response = await _orderService.GetOrdersAsync(userId);
-                }
-                else
-                {
-                    response = await _orderService.GetOrdersAsync();
-                }
-                
                 return Ok(response);
             }
             catch (Exception exception)
