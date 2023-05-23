@@ -24,24 +24,60 @@ public class GameService : IGameService
         _gameRepository = gameRepository;
         _mapper = mapper;
     }
-    public async Task<Response<List<GameDto>?>> GetGamesAsync()
+    public async Task<Response<List<GameDto>?>> GetGamesAsync(string? sort, string? genre, string? name, decimal? minPrice, decimal? maxPrice,
+        int? activationId, int? platformId)
     {
         try
         {
             var response = new Response<List<GameDto>?>();
-            var games = await _gameRepository.GetAll()
+            IQueryable<Game> games = _gameRepository.GetAll()
                 .Include(game => game.Publisher)
                 .Include(game => game.Developer)
                 .Include((game => game.Activation))
                 .Include(game => game.GameMinSpecifications)
-                    .ThenInclude(gm => gm.MinimumSpecification)
-                        .ThenInclude(ms => ms.Platform)
+                .ThenInclude(gm => gm.MinimumSpecification)
+                .ThenInclude(ms => ms.Platform)
                 .Include(game => game.GameGenres)
-                    .ThenInclude(gg => gg.Genre)
-                .Select(game => _mapper.Map<GameDto>(game))
-                .ToListAsync();
+                .ThenInclude(gg => gg.Genre);
 
-            response.Data = games;
+            games = games.Where(game => 
+                (string.IsNullOrEmpty(genre) || game.GameGenres.Any(g => genre == g.Genre.Name)) && 
+                (string.IsNullOrEmpty(name) || game.Name.StartsWith(name)) &&
+                (!minPrice.HasValue || game.Price >= minPrice.Value) &&
+                (!maxPrice.HasValue || game.Price <= maxPrice.Value) &&
+                (!maxPrice.HasValue || game.Price <= maxPrice.Value) && 
+                (!activationId.HasValue || game.ActivationId == activationId) &&
+                (!platformId.HasValue || game.GameMinSpecifications.Any(ms => platformId == ms.MinimumSpecification.PlatformId))
+                );
+            
+            switch (sort)
+            {
+                case "date":
+                    games = games.OrderBy(game => game.ReleaseOn);
+                    break;
+                case "price":
+                    games = games.OrderBy(game => game.Price);
+                    break;
+                case "name":
+                    games = games.OrderBy(game => game.Name);
+                    break;
+                case "id_desc":
+                    games = games.OrderByDescending(game => game.Id);
+                    break;
+                case "date_desc":
+                    games = games.OrderByDescending(game => game.ReleaseOn);
+                    break;
+                case "price_desc":
+                    games = games.OrderByDescending(game => game.Price);
+                    break;
+                case "name_desc":
+                    games = games.OrderByDescending(game => game.Name);
+                    break;
+            }
+            
+            response.Data = await games.Select(game => _mapper.Map<GameDto>(game))
+                .ToListAsync();
+            
             response.Status = HttpStatusCode.Ok;
             return response;
         }

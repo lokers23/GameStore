@@ -38,12 +38,12 @@ public class GamesController : ControllerBase
 
     [HttpGet]
     
-    public async Task<IActionResult> GetGames()
+    public async Task<IActionResult> GetGames([FromQuery] string? sort = null, [FromQuery] string? genre = null, [FromQuery] string? name = null,
+        [FromQuery] decimal? minPrice = null, [FromQuery] decimal? maxPrice = null, [FromQuery] int? activationId = null, [FromQuery] int? platformId = null)
     {
         try
         {
-            
-            var response = await _gameService.GetGamesAsync();
+            var response = await _gameService.GetGamesAsync(sort, genre, name, minPrice, maxPrice, activationId, platformId);
             return Ok(response);
         }
         catch (Exception exception)
