@@ -14,6 +14,6 @@ public class KeyViewModel
     //[Required(ErrorMessage = "Выберите платформу для активации ключа")]
     //public int? ActivationId { get; set; }
     
-    [Required(ErrorMessage = "Выберите платформу")]
+    [Required(ErrorMessage = "Выберите использованый ли ключ")]
     public bool? IsUsed { get; set; }
 }

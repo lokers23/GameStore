@@ -24,7 +24,7 @@ public class GameService : IGameService
         _gameRepository = gameRepository;
         _mapper = mapper;
     }
-    public async Task<Response<List<GameDto>?>> GetGamesAsync(string? sort, string? genre, string? name, decimal? minPrice, decimal? maxPrice,
+    public async Task<Response<List<GameDto>?>> GetGamesAsync(int? page, int? pageSize, string? sort, string? genre, string? name, decimal? minPrice, decimal? maxPrice,
         int? activationId, int? platformId)
     {
         try
@@ -73,6 +73,21 @@ public class GameService : IGameService
                 case "name_desc":
                     games = games.OrderByDescending(game => game.Name);
                     break;
+            }
+            
+            if (page.HasValue && pageSize.HasValue)
+            {
+                var totalGames = await games.CountAsync();
+                var hasNextPage = totalGames > page * pageSize;
+                var hasPreviousPage = page > 1;
+                
+                games =  games
+                    .Skip((page.Value - 1) * pageSize.Value)
+                    .Take(pageSize.Value);
+
+                
+                response.HasPreviousPage = hasPreviousPage;
+                response.HasNextPage = hasNextPage;
             }
             
             response.Data = await games.Select(game => _mapper.Map<GameDto>(game))

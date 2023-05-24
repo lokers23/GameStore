@@ -25,17 +25,31 @@ namespace GameStore.Service.Services
             _platformRepository = platformRepository;
             _mapper = mapper;
         }
-        public async Task<Response<List<PlatformDto>?>> GetPlatformsAsync()
+        public async Task<Response<List<PlatformDto>?>> GetPlatformsAsync(int? page, int? pageSize)
         {
             try
             {
                 var response = new Response<List<PlatformDto>?>();
-                var platforms = await _platformRepository.GetAll()
+                var platforms = _platformRepository.GetAll();
+                
+                if (page.HasValue && pageSize.HasValue)
+                {
+                    var totalDevelopers = await platforms.CountAsync();
+                    var hasNextPage = totalDevelopers > page * pageSize;
+                    var hasPreviousPage = page > 1;
+                
+                    platforms =  platforms
+                        .Skip((page.Value - 1) * pageSize.Value)
+                        .Take(pageSize.Value);
+                    
+                    response.HasPreviousPage = hasPreviousPage;
+                    response.HasNextPage = hasNextPage;
+                }
+                
+                response.Status = HttpStatusCode.Ok;
+                response.Data = await platforms
                     .Select(p => _mapper.Map<PlatformDto>(p))
                     .ToListAsync();
-
-                response.Status = HttpStatusCode.Ok;
-                response.Data = platforms;
 
                 return response;
             }

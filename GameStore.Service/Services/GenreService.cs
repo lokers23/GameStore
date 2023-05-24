@@ -24,16 +24,35 @@ public class GenreService : IGenreService
         _genreRepository = genreRepository;
         _mapper = mapper;
     }
-    public async Task<Response<List<GenreDto>?>> GetGenresAsync()
+    public async Task<Response<List<GenreDto>?>> GetGenresAsync(int? page, int? pageSize)
     {
         try
         {
             var response = new Response<List<GenreDto>?>();
-            var genres = await _genreRepository.GetAll()
-                .Select(genre => _mapper.Map<GenreDto>(genre))
-                .ToListAsync();
+            if (page.HasValue && pageSize.HasValue)
+            {
+                var genres = await _genreRepository.GetAll()
+                        .Skip((page.Value - 1) * pageSize.Value)
+                        .Take(pageSize.Value)
+                    .Select(genre => _mapper.Map<GenreDto>(genre))
+                    .ToListAsync();
+
+                var hasNextPage = await _genreRepository.GetAll().CountAsync() > page * pageSize;
+                var hasPreviousPage = page > 1;
+                response.HasPreviousPage = hasPreviousPage;
+                response.HasNextPage = hasNextPage;
+                response.Data = genres;
+            }
+            else
+            {
+                var genres = await _genreRepository.GetAll()
+                    .Select(genre => _mapper.Map<GenreDto>(genre))
+                    .ToListAsync();
+                response.Data = genres;
+            }
             
-            response.Data = genres;
+            
+           
             response.Status = HttpStatusCode.Ok;
             return response;
         }

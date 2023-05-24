@@ -25,16 +25,28 @@ namespace GameStore.Service.Services
             _developerRepository = genreRepository;
             _mapper = mapper;
         }
-        public async Task<Response<List<DeveloperDto>?>> GetDevelopersAsync()
+        public async Task<Response<List<DeveloperDto>?>> GetDevelopersAsync(int? page, int? pageSize)
         {
             try
             {
                 var response = new Response<List<DeveloperDto>?>();
-                var developers = await _developerRepository.GetAll()
-                    .Select(developer => _mapper.Map<DeveloperDto>(developer))
+                var developers =  _developerRepository.GetAll();
+                if (page.HasValue && pageSize.HasValue)
+                {
+                    var totalDevelopers = await developers.CountAsync();
+                    var hasNextPage = totalDevelopers > page * pageSize;
+                    var hasPreviousPage = page > 1;
+                
+                    developers =  developers
+                        .Skip((page.Value - 1) * pageSize.Value)
+                        .Take(pageSize.Value);
+                    
+                    response.HasPreviousPage = hasPreviousPage;
+                    response.HasNextPage = hasNextPage;
+                }
+                
+                response.Data = await developers.Select(developer => _mapper.Map<DeveloperDto>(developer))
                     .ToListAsync();
-
-                response.Data = developers;
                 response.Status = HttpStatusCode.Ok;
                 return response;
             }

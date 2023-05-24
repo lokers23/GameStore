@@ -8,5 +8,7 @@ namespace GameStore.Domain.Response
         public string? Message { get; set; }
         public Dictionary<string, string[]>? Errors { get; set; }
         public HttpStatusCode Status { get; set; }
+        public bool? HasNextPage { get; set; }
+        public bool? HasPreviousPage { get; set; }
     }
 }

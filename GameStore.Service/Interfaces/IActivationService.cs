@@ -6,7 +6,7 @@ namespace GameStore.Service.Interfaces;
 
 public interface IActivationService
 {
-    Task<Response<List<ActivationDto>?>> GetActivationsAsync();
+    Task<Response<List<ActivationDto>?>> GetActivationsAsync(int? page, int? pageSize);
     Task<Response<ActivationDto?>> GetActivationByIdAsync(int id);
     Task<Response<ActivationDto?>> CreateActivationAsync(ActivationViewModel activationViewModel);
     Task<Response<ActivationDto?>> UpdateActivationAsync(int id, ActivationViewModel activationViewModel);

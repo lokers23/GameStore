@@ -1,6 +1,7 @@
 ﻿using GameStore.API.Extensions;
 using GameStore.Domain.Constants;
 using GameStore.Domain.Dto.Key;
+using GameStore.Domain.Enums;
 using GameStore.Domain.Helpers;
 using GameStore.Domain.ViewModels.Key;
 using GameStore.Service.Interfaces;
@@ -13,19 +14,21 @@ namespace GameStore.API.Controllers
     public class KeysController : ControllerBase
     {
         private readonly IKeyService _keyService;
+        private readonly IGameService _gameService;
         private readonly ILogger<KeysController> _logger;
-        public KeysController(IKeyService keyService, ILogger<KeysController> logger)
+        public KeysController(IKeyService keyService, IGameService gameService,ILogger<KeysController> logger)
         {
             _keyService = keyService;
+            _gameService = gameService;
             _logger = logger;
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetKeys(int? gameId = null)
+        public async Task<IActionResult> GetKeys([FromQuery] int? page, [FromQuery] int? pageSize, int? gameId = null)
         {
             try
             {
-                var response = await _keyService.GetKeysAsync(gameId);
+                var response = await _keyService.GetKeysAsync(page, pageSize, gameId);
                 return Ok(response);
             }
             catch (Exception exception)
@@ -86,6 +89,12 @@ namespace GameStore.API.Controllers
                     return BadRequest(new { Message = MessageResponse.Invalid, Errors = errors });
                 }
 
+                var responseGame = await _gameService.GetGameByIdAsync(keyViewModel.GameId.Value);
+                if (responseGame.Status == HttpStatusCode.NotFound)
+                {
+                    return StatusCode((int)responseGame.Status, responseGame);
+                }
+                
                 var response = await _keyService.CreateKeyAsync(keyViewModel);
                 if ((int)response.Status >= 300)
                 {

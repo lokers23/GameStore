@@ -38,12 +38,12 @@ public class GamesController : ControllerBase
 
     [HttpGet]
     
-    public async Task<IActionResult> GetGames([FromQuery] string? sort = null, [FromQuery] string? genre = null, [FromQuery] string? name = null,
+    public async Task<IActionResult> GetGames([FromQuery] int? page = null, [FromQuery] int? pageSize = null, [FromQuery] string? sort = null, [FromQuery] string? genre = null, [FromQuery] string? name = null,
         [FromQuery] decimal? minPrice = null, [FromQuery] decimal? maxPrice = null, [FromQuery] int? activationId = null, [FromQuery] int? platformId = null)
     {
         try
         {
-            var response = await _gameService.GetGamesAsync(sort, genre, name, minPrice, maxPrice, activationId, platformId);
+            var response = await _gameService.GetGamesAsync(page, pageSize,sort, genre, name, minPrice, maxPrice, activationId, platformId);
             return Ok(response);
         }
         catch (Exception exception)
@@ -87,6 +87,21 @@ public class GamesController : ControllerBase
                 ModelState.AddModelError("Avatar", "Изображение должно быть в формате JPG");
             }
 
+            if (gameViewModel.DeveloperId == 0)
+            {
+                ModelState.AddModelError("DeveloperId", "Укажите разработчика");
+            }
+            
+            if (gameViewModel.PublisherId == 0)
+            {
+                ModelState.AddModelError("PublisherId", "Укажите издателя");
+            }
+            
+            if (gameViewModel.ActivationId == 0)
+            {
+                ModelState.AddModelError("ActivationId", "Укажите активацию");
+            }
+            
             if (!ModelState.IsValid)
             {
                 var errors = ModelState.AllErrors();
@@ -282,13 +297,13 @@ public class GamesController : ControllerBase
         var developer = await _developerService.GetDeveloperByIdAsync(gameViewModel.DeveloperId.Value);
         if (developer.Data == null)
         {
-            return new Dictionary<string, string[]>() { { "DeveloperId", new string[] { developer.Message } } };
+            return new Dictionary<string, string[]>() { { "developerId", new string[] { developer.Message } } };
         }
 
         var publisher = await _publisherService.GetPublisherByIdAsync(gameViewModel.PublisherId.Value);
         if (publisher.Data == null)
         {
-            return new Dictionary<string, string[]>() { { "PublisherId", new string[] { publisher.Message } } };
+            return new Dictionary<string, string[]>() { { "publisherId", new string[] { publisher.Message } } };
         }
 
         foreach (var id in gameViewModel.GenreIds)
@@ -296,7 +311,7 @@ public class GamesController : ControllerBase
             var genre = await _genreService.GetGenreByIdAsync(id);
             if (genre.Data == null)
             {
-                return new Dictionary<string, string[]>() { { "GenreIds", new string[] { genre.Message } } };
+                return new Dictionary<string, string[]>() { { "genreIds", new string[] { genre.Message } } };
             }
         }
 
@@ -305,7 +320,7 @@ public class GamesController : ControllerBase
             var minSpec = await _minSpecificationService.GetMinSpecByIdAsync(id);
             if (minSpec.Data == null)
             {
-                return new Dictionary<string, string[]>() { { "MinimumSpecificationIds", new string[] { minSpec.Message } } };
+                return new Dictionary<string, string[]>() { { "minimumSpecificationIds", new string[] { minSpec.Message } } };
             }
         }
 

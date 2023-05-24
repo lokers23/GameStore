@@ -8,7 +8,7 @@ namespace GameStore.Service.Interfaces
     {
         Task<Response<DeveloperDto?>> CreateDeveloperAsync(DeveloperViewModel developer);
         Task<Response<DeveloperDto?>> UpdateDeveloperAsync(int id, DeveloperViewModel developer);
-        Task<Response<List<DeveloperDto>?>> GetDevelopersAsync();
+        Task<Response<List<DeveloperDto>?>> GetDevelopersAsync(int? page, int? pageSize);
         Task<Response<DeveloperDto?>> GetDeveloperByIdAsync(int id);
         Task<Response<bool?>> DeleteDeveloperAsync(int id);
         Task<Response<bool>> CheckExistAsync(DeveloperViewModel developerView, int id = 0);

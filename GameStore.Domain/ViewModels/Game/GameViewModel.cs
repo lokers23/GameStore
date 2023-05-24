@@ -7,7 +7,7 @@ public class GameViewModel
 {
     [Required(ErrorMessage = "Укажите название")]
     public string? Name { get; set; }
-    
+
     [Required(ErrorMessage = "Укажите разработчика")]
     public int? DeveloperId { get; set; }
     

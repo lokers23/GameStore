@@ -24,12 +24,27 @@ public class MinSpecsController : ControllerBase
         _logger = logger;
     }
 
+    // [HttpGet]
+    // public async Task<IActionResult> GetMinSpecifications(string? platformName)
+    // {
+    //     try
+    //     {
+    //         var response = await _minSpecService.GetMinSpecsAsync(platformName);
+    //         return Ok(response);
+    //     }
+    //     catch (Exception exception)
+    //     {
+    //         var response = Catcher.CatchError<List<MinSpecDto>?, MinSpecsController>(exception, _logger);
+    //         return StatusCode((int)response.Status, response);
+    //     }
+    // }
+    
     [HttpGet]
-    public async Task<IActionResult> GetMinSpecifications(string? platformName)
+    public async Task<IActionResult> GetMinSpecifications(string? platformName, [FromQuery] int? page, [FromQuery] int? pageSize)
     {
         try
         {
-            var response = await _minSpecService.GetMinSpecsAsync(platformName);
+            var response = await _minSpecService.GetMinSpecsAsync(platformName, page, pageSize);
             return Ok(response);
         }
         catch (Exception exception)

@@ -7,7 +7,7 @@ namespace GameStore.Service.Interfaces;
 
 public interface IGenreService
 {
-    Task<Response<List<GenreDto>?>> GetGenresAsync();
+    Task<Response<List<GenreDto>?>> GetGenresAsync(int? page, int? pageSize);
     Task<Response<GenreDto?>> GetGenreByIdAsync(int id);
     Task<Response<GenreDto?>> CreateGenreAsync(GenreViewModel genre);
     Task<Response<GenreDto?>> UpdateGenreAsync(int id, GenreViewModel genre);

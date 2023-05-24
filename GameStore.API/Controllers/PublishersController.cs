@@ -23,11 +23,11 @@ namespace GameStore.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetPublishers()
+        public async Task<IActionResult> GetPublishers([FromQuery] int? page, [FromQuery] int? pageSize)
         {
             try
             {
-                var response = await _publisherService.GetPublishersAsync();
+                var response = await _publisherService.GetPublishersAsync(page, pageSize);
                 return Ok(response);
             }
             catch (Exception exception)

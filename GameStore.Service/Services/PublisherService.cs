@@ -24,16 +24,30 @@ namespace GameStore.Service.Services
             _publisherRepository = publisherRepository;
             _mapper = mapper;
         }
-        public async Task<Response<List<PublisherDto>?>> GetPublishersAsync()
+        public async Task<Response<List<PublisherDto>?>> GetPublishersAsync(int? page, int? pageSize)
         {
             try
             {
                 var response = new Response<List<PublisherDto>?>();
-                var publisher = await _publisherRepository.GetAll()
-                    .Select(p => _mapper.Map<PublisherDto>(p))
-                    .ToListAsync();
+                var publishers =  _publisherRepository.GetAll();
                 
-                response.Data = publisher;
+                if (page.HasValue && pageSize.HasValue)
+                {
+                    var totalDevelopers = await publishers.CountAsync();
+                    var hasNextPage = totalDevelopers > page * pageSize;
+                    var hasPreviousPage = page > 1;
+                
+                    publishers =  publishers
+                        .Skip((page.Value - 1) * pageSize.Value)
+                        .Take(pageSize.Value);
+                    
+                    response.HasPreviousPage = hasPreviousPage;
+                    response.HasNextPage = hasNextPage;
+                }
+                
+                response.Data = await publishers
+                    .Select(publisher => _mapper.Map<PublisherDto>(publisher))
+                    .ToListAsync();;
                 response.Status = HttpStatusCode.Ok;
                 return response;
             }

@@ -19,32 +19,48 @@ public class OrderService : IOrderService
     private readonly IRepository<Order> _orderRepository;
     private readonly IRepository<Key> _keyRepository;
     private readonly IRepository<Game> _gameRepository;
+    private readonly IBalanceService _balanceService;
     private readonly IMapper _mapper;
     private readonly ILogger<OrderService> _logger;
     public OrderService(ILogger<OrderService> logger, IRepository<Order> orderRepository,
-        IRepository<Key> keyRepository, IRepository<Game> gameRepository, IMapper mapper)
+        IRepository<Key> keyRepository, IRepository<Game> gameRepository, IBalanceService balanceService, IMapper mapper)
     {
         _logger = logger;
         _orderRepository = orderRepository;
         _keyRepository = keyRepository;
         _gameRepository = gameRepository;
+        _balanceService = balanceService;
         _mapper = mapper;
     }
-    public async Task<Response<List<OrderDto>?>> GetOrdersAsync(int? userId = null)
+    public async Task<Response<List<OrderDto>?>> GetOrdersAsync(int? page, int? pageSize, int? userId = null)
     {
         try
         {
             var response = new Response<List<OrderDto>?>();
-            var orders = await _orderRepository.GetAll()
+            var orders = _orderRepository.GetAll()
                 .Include(order => order.User)
                 .Include(order => order.KeyOrders)
-                    .ThenInclude(keyOrder => keyOrder.Key)
-                        .ThenInclude(key => key.Game)
-                .Where(g=> !userId.HasValue || g.User.Id == userId)
-                .Select(order => _mapper.Map<OrderDto>(order))
-                .ToListAsync();
+                .ThenInclude(keyOrder => keyOrder.Key)
+                .ThenInclude(key => key.Game)
+                .Where(g => !userId.HasValue || g.User.Id == userId);
+                
+            if (page.HasValue && pageSize.HasValue)
+            {
+                var totalGames = await orders.CountAsync();
+                var hasNextPage = totalGames > page * pageSize;
+                var hasPreviousPage = page > 1;
+                
+                orders =  orders
+                    .Skip((page.Value - 1) * pageSize.Value)
+                    .Take(pageSize.Value);
 
-            response.Data = orders;
+                response.HasPreviousPage = hasPreviousPage;
+                response.HasNextPage = hasNextPage;
+            }
+            
+            response.Data = await orders
+                .Select(order => _mapper.Map<OrderDto>(order))
+                .ToListAsync();;
             response.Status = HttpStatusCode.Ok;
             return response;
         }
@@ -161,13 +177,17 @@ public class OrderService : IOrderService
             //    return response;
             //}
 
-            //if (order.Amount > user.Balance)
-            //{
+            if (order.Amount > user.Balance)
+            {
+                response.Status = HttpStatusCode.Conflict;
+                response.Errors = new Dictionary<string, string[]> { { "balance", new[] { "Не достаточно денег на балансе" } } };
+                return response;
+            }
 
-            //}
-
+            
             await _orderRepository.CreateAsync(order);
-
+            await _balanceService.DeductFromBalance(user.Id, order.Amount);
+            
             response.Status = HttpStatusCode.Created;
             response.Data = _mapper.Map<OrderDto>(order);
             return response;

@@ -25,7 +25,7 @@ public class MinSpecificationService: IMinSpecificationService
         _minSpecRepository = minSpecRepository;
         _mapper = mapper;
     }
-    public async Task<Response<List<MinSpecDto>?>> GetMinSpecsAsync(string? platformName)
+    public async Task<Response<List<MinSpecDto>?>> GetMinSpecsAsync(string? platformName, int? page, int? pageSize)
     {
         try
         {
@@ -34,25 +34,48 @@ public class MinSpecificationService: IMinSpecificationService
                 Status = HttpStatusCode.Ok
             };
 
+            IQueryable<MinimumSpecification> minSpecifications = _minSpecRepository
+                .GetAll()
+                .Include(minSpec => minSpec.Platform);
 
-            List<MinSpecDto> minSpecifications;
-            if (!string.IsNullOrWhiteSpace(platformName))
+            minSpecifications = minSpecifications
+                .Where(minSpec => 
+                    string.IsNullOrEmpty(platformName) || minSpec.Platform.Name == platformName
+                    );
+            
+            // if (!string.IsNullOrWhiteSpace(platformName))
+            // {
+            //     minSpecifications = await _minSpecRepository.GetAll()
+            //         .Include(m => m.Platform)
+            //         .Where(m => m.Platform.Name == platformName)
+            //         .Select(minSpecification => _mapper.Map<MinSpecDto>(minSpecification))
+            //     .ToListAsync();
+            // }
+            // else
+            // {
+            //     minSpecifications = await _minSpecRepository.GetAll()
+            //         .Include(m => m.Platform)
+            //         .Select(minSpecification => _mapper.Map<MinSpecDto>(minSpecification))
+            //     .ToListAsync();
+            // }
+            
+            if (page.HasValue && pageSize.HasValue)
             {
-                minSpecifications = await _minSpecRepository.GetAll()
-                    .Include(m => m.Platform)
-                    .Where(m => m.Platform.Name == platformName)
-                    .Select(minSpecification => _mapper.Map<MinSpecDto>(minSpecification))
-                .ToListAsync();
-            }
-            else
-            {
-                minSpecifications = await _minSpecRepository.GetAll()
-                    .Include(m => m.Platform)
-                    .Select(minSpecification => _mapper.Map<MinSpecDto>(minSpecification))
-                .ToListAsync();
+                var totalGames = await minSpecifications.CountAsync();
+                var hasNextPage = totalGames > page * pageSize;
+                var hasPreviousPage = page > 1;
+                
+                minSpecifications =  minSpecifications
+                    .Skip((page.Value - 1) * pageSize.Value)
+                    .Take(pageSize.Value);
+
+                response.HasPreviousPage = hasPreviousPage;
+                response.HasNextPage = hasNextPage;
             }
             
-            response.Data = minSpecifications;
+            response.Data = await minSpecifications
+                .Select(minSpecification => _mapper.Map<MinSpecDto>(minSpecification))
+                .ToListAsync();;
             return response;
         }
         catch (Exception exception)

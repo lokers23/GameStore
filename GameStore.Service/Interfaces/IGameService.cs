@@ -6,7 +6,7 @@ namespace GameStore.Service.Interfaces;
 
 public interface IGameService
 {
-    Task<Response<List<GameDto>?>> GetGamesAsync(string? sort, string? genre, string? name, decimal? minPrice, decimal? maxPrice,
+    Task<Response<List<GameDto>?>> GetGamesAsync(int? page, int? pageSize,string? sort, string? genre, string? name, decimal? minPrice, decimal? maxPrice,
         int? activationId, int? platformId);
     Task<Response<GameDto?>> GetGameByIdAsync(int id);
     Task<Response<GameDto?>> CreateGameAsync(GameViewModel gameViewModel);

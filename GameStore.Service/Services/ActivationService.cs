@@ -25,16 +25,29 @@ public class ActivationService : IActivationService
         _activationRepository = activationRepository;
         _mapper = mapper;
     }
-    public async Task<Response<List<ActivationDto>?>> GetActivationsAsync()
+    public async Task<Response<List<ActivationDto>?>> GetActivationsAsync(int? page, int? pageSize)
     {
         try
         {
             var response = new Response<List<ActivationDto>?>();
-            var activations = await _activationRepository.GetAll()
-                .Select(activation => _mapper.Map<ActivationDto>(activation))
-                .ToListAsync();
+            var activations =  _activationRepository.GetAll();
 
-            response.Data = activations;
+            if (page.HasValue && pageSize.HasValue)
+            {
+                var totalDevelopers = await activations.CountAsync();
+                var hasNextPage = totalDevelopers > page * pageSize;
+                var hasPreviousPage = page > 1;
+                
+                activations =  activations
+                    .Skip((page.Value - 1) * pageSize.Value)
+                    .Take(pageSize.Value);
+                
+                response.HasPreviousPage = hasPreviousPage;
+                response.HasNextPage = hasNextPage;
+            }
+            
+            response.Data = await activations.Select(activation => _mapper.Map<ActivationDto>(activation))
+                .ToListAsync();;
             response.Status = HttpStatusCode.Ok;
             return response;
         }

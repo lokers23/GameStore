@@ -26,11 +26,11 @@ namespace GameStore.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetPlatforms()
+        public async Task<IActionResult> GetPlatforms([FromQuery]int? page, [FromQuery]int? pageSize)
         {
             try
             {
-                var response = await _platformService.GetPlatformsAsync();
+                var response = await _platformService.GetPlatformsAsync(page, pageSize);
                 return Ok(response);
             }
             catch (Exception exception)

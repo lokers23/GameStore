@@ -24,18 +24,32 @@ public class KeyService: IKeyService
         _keyRepository = keyRepository;
         _mapper = mapper;
     }
-    public async Task<Response<List<KeyDto>?>> GetKeysAsync(int? gameId)
+    public async Task<Response<List<KeyDto>?>> GetKeysAsync(int? page, int? pageSize, int? gameId)
     {
         try
         {
             var response = new Response<List<KeyDto>?>();
-            var keys = await _keyRepository.GetAll()
+            var keys = _keyRepository.GetAll()
                 .Include(key => key.Game)
-                .Where(key => !gameId.HasValue || key.GameId == gameId)
+                .Where(key => !gameId.HasValue || key.GameId == gameId);
+                
+            if (page.HasValue && pageSize.HasValue)
+            {
+                var totalGames = await keys.CountAsync();
+                var hasNextPage = totalGames > page * pageSize;
+                var hasPreviousPage = page > 1;
+                
+                keys =  keys
+                    .Skip((page.Value - 1) * pageSize.Value)
+                    .Take(pageSize.Value);
+                
+                response.HasPreviousPage = hasPreviousPage;
+                response.HasNextPage = hasNextPage;
+            }
+            
+            response.Data = await keys
                 .Select(key => _mapper.Map<KeyDto>(key))
                 .ToListAsync();
-            
-            response.Data = keys;
             response.Status = HttpStatusCode.Ok;
             return response;
         }

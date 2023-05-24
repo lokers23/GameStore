@@ -21,21 +21,23 @@ namespace GameStore.API.Controllers
         private readonly IKeyService _keyService;
         private readonly IGameService _gameService;
         private readonly IUserService _userService;
+        private readonly IBalanceService _balanceService;
         private readonly ILogger<OrdersController> _logger;
 
         public OrdersController(IOrderService orderService, IKeyService keyService,
-            IGameService gameService, IUserService userService, ILogger<OrdersController> logger)
+            IGameService gameService, IUserService userService, IBalanceService balanceService,ILogger<OrdersController> logger)
         {
             _orderService = orderService;
             _keyService = keyService;
             _gameService = gameService;
             _userService = userService;
+            _balanceService = balanceService;
             _logger = logger;
         }
 
         [HttpGet("user")]
         [Authorize]
-        public async Task<IActionResult> GetOrdersByUser()
+        public async Task<IActionResult> GetOrdersByUser([FromQuery]int? page, [FromQuery]int? pageSize)
         {
             try
             {
@@ -48,8 +50,7 @@ namespace GameStore.API.Controllers
                 }
 
                 var role = claimsIdentity.FindFirst(ClaimTypes.Role)?.Value;
-                Response<List<OrderDto>> response; 
-                response = await _orderService.GetOrdersAsync(userId);
+                var response = await _orderService.GetOrdersAsync(page, pageSize, userId);
                 return Ok(response);
             }
             catch (Exception exception)
@@ -60,13 +61,11 @@ namespace GameStore.API.Controllers
         }
         [HttpGet]
         [Authorize(nameof(AccessRole.Moderator))]
-        public async Task<IActionResult> GetOrders()
+        public async Task<IActionResult> GetOrders([FromQuery]int? page, [FromQuery]int? pageSize)
         {
             try
             {
-                Response<List<OrderDto>> response;
-                response = await _orderService.GetOrdersAsync();
-
+                var response = await _orderService.GetOrdersAsync(page, pageSize);
                 return Ok(response);
             }
             catch (Exception exception)
