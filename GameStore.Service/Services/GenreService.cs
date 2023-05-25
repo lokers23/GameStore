@@ -24,35 +24,32 @@ public class GenreService : IGenreService
         _genreRepository = genreRepository;
         _mapper = mapper;
     }
-    public async Task<Response<List<GenreDto>?>> GetGenresAsync(int? page, int? pageSize)
+    public async Task<Response<List<GenreDto>?>> GetGenresAsync(int? page, int? pageSize, string? name)
     {
         try
         {
             var response = new Response<List<GenreDto>?>();
+            var genres =  _genreRepository.GetAll()
+                .Where(genre => 
+                    (string.IsNullOrEmpty(name) || genre.Name.StartsWith(name)));
+            
+            
             if (page.HasValue && pageSize.HasValue)
             {
-                var genres = await _genreRepository.GetAll()
-                        .Skip((page.Value - 1) * pageSize.Value)
-                        .Take(pageSize.Value)
-                    .Select(genre => _mapper.Map<GenreDto>(genre))
-                    .ToListAsync();
-
-                var hasNextPage = await _genreRepository.GetAll().CountAsync() > page * pageSize;
+                var totalDevelopers = await genres.CountAsync();
+                var hasNextPage = totalDevelopers > page * pageSize;
                 var hasPreviousPage = page > 1;
+                
+                genres =  genres
+                    .Skip((page.Value - 1) * pageSize.Value)
+                    .Take(pageSize.Value);
+                    
                 response.HasPreviousPage = hasPreviousPage;
                 response.HasNextPage = hasNextPage;
-                response.Data = genres;
             }
-            else
-            {
-                var genres = await _genreRepository.GetAll()
-                    .Select(genre => _mapper.Map<GenreDto>(genre))
-                    .ToListAsync();
-                response.Data = genres;
-            }
-            
-            
-           
+
+            response.Data = await genres.Select(genre => _mapper.Map<GenreDto>(genre))
+                .ToListAsync();
             response.Status = HttpStatusCode.Ok;
             return response;
         }

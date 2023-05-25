@@ -10,11 +10,12 @@ namespace GameStore.Service.Interfaces
     {
         public Task<Response<bool>> CreateUserAsync(RegistrationViewModel viewModel);
         public Task<Response<bool>> DeleteUserAsync(int id);
-        public Task<Response<bool>> UpdateUserAsync(User user);
+        public Task<Response<bool>> ChangeRoleUser(AccessRole role, int userId);
         public Task<Response<User?>> GetUserByIdAsync(int id);
         public Task<Response<User?>> GetUserByLoginAsync(string login);
         public Task<Response<List<User>>> GetUsersAsync();
         public string CreateToken(User user, AccessRole role);
+        public Task<Response<bool>> ChangePassword(string hashPassword, int userId);
 
     }
 }

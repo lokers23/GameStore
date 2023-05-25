@@ -21,11 +21,11 @@ namespace GameStore.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetActivations([FromQuery] int? page, [FromQuery] int? pageSize)
+        public async Task<IActionResult> GetActivations([FromQuery] int? page, [FromQuery] int? pageSize, [FromQuery] string? name)
         {
             try
             {
-                var response = await _activationService.GetActivationsAsync(page, pageSize);
+                var response = await _activationService.GetActivationsAsync(page, pageSize, name);
                 return Ok(response);
             }
             catch (Exception exception)

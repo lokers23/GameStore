@@ -24,11 +24,11 @@ namespace GameStore.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetKeys([FromQuery] int? page, [FromQuery] int? pageSize, int? gameId = null)
+        public async Task<IActionResult> GetKeys([FromQuery] int? page, [FromQuery] int? pageSize, [FromQuery] string? game, int? gameId = null)
         {
             try
             {
-                var response = await _keyService.GetKeysAsync(page, pageSize, gameId);
+                var response = await _keyService.GetKeysAsync(page, pageSize, game, gameId);
                 return Ok(response);
             }
             catch (Exception exception)

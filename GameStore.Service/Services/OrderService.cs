@@ -32,7 +32,7 @@ public class OrderService : IOrderService
         _balanceService = balanceService;
         _mapper = mapper;
     }
-    public async Task<Response<List<OrderDto>?>> GetOrdersAsync(int? page, int? pageSize, int? userId = null)
+    public async Task<Response<List<OrderDto>?>> GetOrdersAsync(int? page, int? pageSize, string? login, int? userId = null)
     {
         try
         {
@@ -42,7 +42,10 @@ public class OrderService : IOrderService
                 .Include(order => order.KeyOrders)
                 .ThenInclude(keyOrder => keyOrder.Key)
                 .ThenInclude(key => key.Game)
-                .Where(g => !userId.HasValue || g.User.Id == userId);
+                .Where(order => 
+                    (!userId.HasValue || order.User.Id == userId) &&
+                    (string.IsNullOrEmpty(login) || order.User.Login.StartsWith(login))
+                    );
                 
             if (page.HasValue && pageSize.HasValue)
             {

@@ -24,14 +24,17 @@ public class KeyService: IKeyService
         _keyRepository = keyRepository;
         _mapper = mapper;
     }
-    public async Task<Response<List<KeyDto>?>> GetKeysAsync(int? page, int? pageSize, int? gameId)
+    public async Task<Response<List<KeyDto>?>> GetKeysAsync(int? page, int? pageSize, string? gameName, int? gameId)
     {
         try
         {
             var response = new Response<List<KeyDto>?>();
             var keys = _keyRepository.GetAll()
                 .Include(key => key.Game)
-                .Where(key => !gameId.HasValue || key.GameId == gameId);
+                .Where(key => 
+                    (!gameId.HasValue || key.GameId == gameId) &&
+                    (string.IsNullOrEmpty(gameName) || key.Game.Name.StartsWith(gameName))
+                    );
                 
             if (page.HasValue && pageSize.HasValue)
             {

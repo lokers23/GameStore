@@ -21,11 +21,11 @@ public class GenresController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetGenres([FromQuery] int? page, [FromQuery] int? pageSize )
+    public async Task<IActionResult> GetGenres([FromQuery] int? page, [FromQuery] int? pageSize, [FromQuery] string? name)
     {
         try
         {
-            var response = await _genreService.GetGenresAsync(page, pageSize);
+            var response = await _genreService.GetGenresAsync(page, pageSize, name);
             return Ok(response);
         }
         catch (Exception exception)

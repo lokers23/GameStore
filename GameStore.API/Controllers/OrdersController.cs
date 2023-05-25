@@ -50,7 +50,7 @@ namespace GameStore.API.Controllers
                 }
 
                 var role = claimsIdentity.FindFirst(ClaimTypes.Role)?.Value;
-                var response = await _orderService.GetOrdersAsync(page, pageSize, userId);
+                var response = await _orderService.GetOrdersAsync(page, pageSize, null, userId);
                 return Ok(response);
             }
             catch (Exception exception)
@@ -61,11 +61,11 @@ namespace GameStore.API.Controllers
         }
         [HttpGet]
         [Authorize(nameof(AccessRole.Moderator))]
-        public async Task<IActionResult> GetOrders([FromQuery]int? page, [FromQuery]int? pageSize)
+        public async Task<IActionResult> GetOrders([FromQuery]int? page, [FromQuery]int? pageSize, [FromQuery]string? login)
         {
             try
             {
-                var response = await _orderService.GetOrdersAsync(page, pageSize);
+                var response = await _orderService.GetOrdersAsync(page, pageSize, login);
                 return Ok(response);
             }
             catch (Exception exception)

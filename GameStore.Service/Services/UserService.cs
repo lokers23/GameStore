@@ -166,29 +166,26 @@ namespace GameStore.Service.Services
                 return response;
             }
         }
-        public async Task<Response<bool>> UpdateUserAsync(User user)
+        public async Task<Response<bool>> ChangeRoleUser(AccessRole role, int userId)
         {
             try
             {
                 var response = new Response<bool>();
-                var userForUpdate = await _repository.GetAll()
-                    .FirstOrDefaultAsync(x => x.Id == user.Id);
+                var user = await _repository.GetAll()
+                    .FirstOrDefaultAsync(x => x.Id == userId);
 
-                if (userForUpdate == null)
+                if (user == null)
                 {
                     response.Status = HttpStatusCode.NotFound;
                     response.Message = MessageResponse.NotFoundEntity;
                     return response;
                 }
 
-                userForUpdate.Login = user.Login;
-                userForUpdate.Password = user.Password;
-                userForUpdate.Balance = user.Balance;
-                userForUpdate.Id = user.Id;
-                userForUpdate.Role = user.Role;
-                await _repository.UpdateAsync(userForUpdate);
+                user.Role = role;
+                await _repository.UpdateAsync(user);
 
                 response.Status = HttpStatusCode.NoContent;
+                response.Data = true;
                 return response;
             }
             catch (Exception exception)
@@ -219,6 +216,36 @@ namespace GameStore.Service.Services
             var jwt = new JwtSecurityTokenHandler().WriteToken(token);
 
             return jwt;
+        }
+
+
+        public async Task<Response<bool>> ChangePassword(string hashPassword, int userId)
+        {
+            try
+            {
+                var response = new Response<bool>();
+                var user = await _repository.GetAll()
+                    .FirstOrDefaultAsync(x => x.Id == userId);
+
+                if (user == null)
+                {
+                    response.Status = HttpStatusCode.NotFound;
+                    response.Message = MessageResponse.NotFoundEntity;
+                    return response;
+                }
+
+                user.Password = hashPassword;
+                await _repository.UpdateAsync(user);
+
+                response.Status = HttpStatusCode.NoContent;
+                response.Data = true;
+                return response;
+            }
+            catch (Exception exception)
+            {
+                var response = Catcher.CatchError<bool, UserService>(exception, _logger);
+                return response;
+            }
         }
     }
 }

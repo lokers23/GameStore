@@ -25,12 +25,14 @@ namespace GameStore.Service.Services
             _platformRepository = platformRepository;
             _mapper = mapper;
         }
-        public async Task<Response<List<PlatformDto>?>> GetPlatformsAsync(int? page, int? pageSize)
+        public async Task<Response<List<PlatformDto>?>> GetPlatformsAsync(int? page, int? pageSize, string? name)
         {
             try
             {
                 var response = new Response<List<PlatformDto>?>();
-                var platforms = _platformRepository.GetAll();
+                var platforms = _platformRepository.GetAll()
+                    .Where(genre => 
+                        (string.IsNullOrEmpty(name) || genre.Name.StartsWith(name)));
                 
                 if (page.HasValue && pageSize.HasValue)
                 {

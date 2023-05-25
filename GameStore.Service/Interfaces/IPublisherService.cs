@@ -8,7 +8,7 @@ namespace GameStore.Service.Interfaces
     {
         Task<Response<PublisherDto?>> CreatePublisherAsync(PublisherViewModel publisher);
         Task<Response<PublisherDto?>> UpdatePublisherAsync(int id, PublisherViewModel publisher);
-        Task<Response<List<PublisherDto>?>> GetPublishersAsync(int? page, int? pageSize);
+        Task<Response<List<PublisherDto>?>> GetPublishersAsync(int? page, int? pageSize, string? name);
         Task<Response<PublisherDto?>> GetPublisherByIdAsync(int id);
         Task<Response<bool?>> DeletePublisherAsync(int id);
         Task<Response<bool>> CheckExistAsync(PublisherViewModel publisherView, int id);

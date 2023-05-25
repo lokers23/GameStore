@@ -22,11 +22,11 @@ namespace GameStore.API.Controllers
 
         [HttpGet]
         //[Authorize(Roles = nameof(AccessRole.Administrator))]
-        public async Task<IActionResult> GetDevelopers([FromQuery] int? page, [FromQuery] int? pageSize)
+        public async Task<IActionResult> GetDevelopers([FromQuery] int? page, [FromQuery] int? pageSize, [FromQuery] string? name)
         {
             try
             {
-                var response = await _developerService.GetDevelopersAsync(page, pageSize);
+                var response = await _developerService.GetDevelopersAsync(page, pageSize, name);
                 return Ok(response);
             }
             catch (Exception exception)

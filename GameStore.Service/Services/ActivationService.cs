@@ -25,12 +25,14 @@ public class ActivationService : IActivationService
         _activationRepository = activationRepository;
         _mapper = mapper;
     }
-    public async Task<Response<List<ActivationDto>?>> GetActivationsAsync(int? page, int? pageSize)
+    public async Task<Response<List<ActivationDto>?>> GetActivationsAsync(int? page, int? pageSize, string? name)
     {
         try
         {
             var response = new Response<List<ActivationDto>?>();
-            var activations =  _activationRepository.GetAll();
+            var activations =  _activationRepository.GetAll()
+                .Where(genre => 
+                    (string.IsNullOrEmpty(name) || genre.Name.StartsWith(name)));
 
             if (page.HasValue && pageSize.HasValue)
             {
