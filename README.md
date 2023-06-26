@@ -5,4 +5,4 @@
 If you want it to work locally, change the database connection string.
 
 # Client part
-can be found at https://github.com/lokers23/game-store-react
+Сan be found at https://github.com/lokers23/game-store-react
