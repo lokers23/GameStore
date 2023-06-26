@@ -25,7 +25,8 @@ public class MinSpecificationService: IMinSpecificationService
         _minSpecRepository = minSpecRepository;
         _mapper = mapper;
     }
-    public async Task<Response<List<MinSpecDto>?>> GetMinSpecsAsync(string? platformName, int? page, int? pageSize)
+    public async Task<Response<List<MinSpecDto>?>> GetMinSpecsAsync(string? platformName, int? page, int? pageSize, string? operatingSystem, 
+        string? processor, string? graphics)
     {
         try
         {
@@ -40,24 +41,11 @@ public class MinSpecificationService: IMinSpecificationService
 
             minSpecifications = minSpecifications
                 .Where(minSpec => 
-                    string.IsNullOrEmpty(platformName) || minSpec.Platform.Name == platformName
+                    (string.IsNullOrEmpty(platformName) || minSpec.Platform.Name == platformName) &&
+                    (string.IsNullOrEmpty(operatingSystem) || minSpec.OperatingSystem.StartsWith(operatingSystem)) &&
+                    (string.IsNullOrEmpty(processor) || minSpec.Processor.StartsWith(processor)) &&
+                    (string.IsNullOrEmpty(graphics) || minSpec.Graphics.StartsWith(graphics))
                     );
-            
-            // if (!string.IsNullOrWhiteSpace(platformName))
-            // {
-            //     minSpecifications = await _minSpecRepository.GetAll()
-            //         .Include(m => m.Platform)
-            //         .Where(m => m.Platform.Name == platformName)
-            //         .Select(minSpecification => _mapper.Map<MinSpecDto>(minSpecification))
-            //     .ToListAsync();
-            // }
-            // else
-            // {
-            //     minSpecifications = await _minSpecRepository.GetAll()
-            //         .Include(m => m.Platform)
-            //         .Select(minSpecification => _mapper.Map<MinSpecDto>(minSpecification))
-            //     .ToListAsync();
-            // }
             
             if (page.HasValue && pageSize.HasValue)
             {

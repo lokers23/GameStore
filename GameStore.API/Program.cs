@@ -141,18 +141,29 @@ using (var scope = app.Services.CreateScope())
     dataContext.Database.Migrate();
 }
 
+
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "GameStoreAPI");
+});
+
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "GameStoreAPI");
-    });
+    app.UseCors(c =>
+    c.AllowAnyHeader()
+    .AllowAnyMethod()
+    .AllowAnyOrigin());
+}
+else
+{
+    app.UseCors(c =>
+    c.AllowAnyHeader()
+    .AllowAnyMethod()
+    .WithOrigins("https://loquacious-lollipop-f49428.netlify.app"));
 }
 
 app.UseHttpsRedirection();
-
-app.UseCors(c => c.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
 
 app.UseAuthentication();
 app.UseAuthorization();

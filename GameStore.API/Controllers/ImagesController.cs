@@ -1,9 +1,11 @@
 ﻿using GameStore.API.Extensions;
 using GameStore.Domain.Constants;
+using GameStore.Domain.Enums;
 using GameStore.Domain.Helpers;
 using GameStore.Domain.Models;
 using GameStore.Domain.ViewModels.Image;
 using GameStore.Service.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GameStore.API.Controllers;
@@ -42,6 +44,7 @@ public class ImagesController : ControllerBase
     }
 
     [HttpPost("{gameId}")]
+    [Authorize(nameof(AccessRole.Moderator))]
     public async Task<IActionResult> CreateImage(int gameId, [FromForm] IFormFile? image)
     {
         try
@@ -81,8 +84,6 @@ public class ImagesController : ControllerBase
             }
 
             await SaveGameImage(gameId, fileName, image);
-
-            // возможно стоит просто возвращать ОК...
             return CreatedAtAction(nameof(GetGameImage), new { gameId = gameId, fileName = fileName }, response);
         }
         catch (Exception exception)
@@ -93,6 +94,7 @@ public class ImagesController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize(nameof(AccessRole.Moderator))]
     public async Task<IActionResult> DeleteImage(int id)
     {
         try

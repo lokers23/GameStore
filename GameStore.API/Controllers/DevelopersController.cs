@@ -1,9 +1,11 @@
 ﻿using GameStore.API.Extensions;
 using GameStore.Domain.Constants;
 using GameStore.Domain.Dto.Developer;
+using GameStore.Domain.Enums;
 using GameStore.Domain.Helpers;
 using GameStore.Domain.ViewModels.Developer;
 using GameStore.Service.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GameStore.API.Controllers
@@ -21,7 +23,6 @@ namespace GameStore.API.Controllers
         }
 
         [HttpGet]
-        //[Authorize(Roles = nameof(AccessRole.Administrator))]
         public async Task<IActionResult> GetDevelopers([FromQuery] int? page, [FromQuery] int? pageSize, [FromQuery] string? name)
         {
             try
@@ -57,6 +58,7 @@ namespace GameStore.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(nameof(AccessRole.Moderator))]
         public async Task<IActionResult> DeleteDeveloper(int id)
         {
             try
@@ -77,6 +79,7 @@ namespace GameStore.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(nameof(AccessRole.Moderator))]
         public async Task<IActionResult> CreateDeveloper([FromBody] DeveloperViewModel developerView)
         {
             try
@@ -103,6 +106,7 @@ namespace GameStore.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(nameof(AccessRole.Moderator))]
         public async Task<IActionResult> UpdateDeveloper(int id, [FromBody] DeveloperViewModel developerView)
         {
             try

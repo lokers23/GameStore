@@ -4,7 +4,6 @@ using GameStore.Domain.Dto.Order;
 using GameStore.Domain.Enums;
 using GameStore.Domain.Helpers;
 using GameStore.Domain.Models;
-using GameStore.Domain.Response;
 using GameStore.Domain.ViewModels.Order;
 using GameStore.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -76,6 +75,7 @@ namespace GameStore.API.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(nameof(AccessRole.Moderator))]
         public async Task<IActionResult> GetOrderById(int id)
         {
             try
@@ -90,12 +90,13 @@ namespace GameStore.API.Controllers
             }
             catch (Exception exception)
             {
-                var response = Catcher.CatchError<Order?, OrdersController>(exception, _logger);
+                var response = Catcher.CatchError<OrderDto?, OrdersController>(exception, _logger);
                 return StatusCode((int)response.Status, response);
             }
         }
 
         [HttpDelete("{id}")]
+        [Authorize(nameof(AccessRole.Administrator))]
         public async Task<IActionResult> DeleteOrder(int id)
         {
             try
@@ -116,6 +117,7 @@ namespace GameStore.API.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> CreateOrder([FromBody] OrderViewModel orderView)
         {
             try
@@ -149,46 +151,5 @@ namespace GameStore.API.Controllers
                 return StatusCode((int)response.Status, response);
             }
         }
-
-        // [HttpPut("{id}")]
-        // public async Task<IActionResult> UpdateOrder(int id, [FromBody] OrderViewModel orderView)
-        // {
-        //     try
-        //     {
-        //         if (id <= 0)
-        //         {
-        //             return BadRequest(MessageResponse.IncorrectId);
-        //         }
-        //
-        //         if (!ModelState.IsValid)
-        //         {
-        //             var errors = ModelState.AllErrors();
-        //             return BadRequest(new { Message = MessageResponse.Invalid, Errors = errors });
-        //         }
-        //         
-        //         var claimsIndentity = User.Identity as ClaimsIdentity;
-        //         var success = int.TryParse(claimsIndentity.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId);
-        //         var isExists = await _userService.GetUserByIdAsync(userId);
-        //         
-        //         if (isExists.Status == HttpStatusCode.NotFound)
-        //         {
-        //             return StatusCode((int)isExists.Status, isExists);
-        //         }
-        //         
-        //         var response = await _orderService.UpdateOrderAsync(id, orderView);
-        //         if ((int)response.Status >= 300)
-        //         {
-        //             return StatusCode((int)response.Status, response);
-        //         }
-        //
-        //         var isSuccess = await _keyService.MarkUsedKeysAsync(response.Data.Keys);
-        //         return NoContent();
-        //     }
-        //     catch (Exception exception)
-        //     {
-        //         var response = Catcher.CatchError<Order?, OrderController>(exception, _logger);
-        //         return StatusCode((int)response.Status, response);
-        //     }
-        // }
     }
 }

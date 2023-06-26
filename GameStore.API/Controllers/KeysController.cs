@@ -5,6 +5,7 @@ using GameStore.Domain.Enums;
 using GameStore.Domain.Helpers;
 using GameStore.Domain.ViewModels.Key;
 using GameStore.Service.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GameStore.API.Controllers
@@ -24,6 +25,7 @@ namespace GameStore.API.Controllers
         }
 
         [HttpGet]
+        [Authorize(nameof(AccessRole.Moderator))]
         public async Task<IActionResult> GetKeys([FromQuery] int? page, [FromQuery] int? pageSize, [FromQuery] string? game, int? gameId = null)
         {
             try
@@ -39,6 +41,7 @@ namespace GameStore.API.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(nameof(AccessRole.Moderator))]
         public async Task<IActionResult> GetKeyById(int id)
         {
             try
@@ -59,6 +62,7 @@ namespace GameStore.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(nameof(AccessRole.Moderator))]
         public async Task<IActionResult> DeleteKey(int id)
         {
             try
@@ -79,6 +83,7 @@ namespace GameStore.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(nameof(AccessRole.Moderator))]
         public async Task<IActionResult> CreateKey([FromBody] KeyViewModel keyViewModel)
         {
             try
@@ -101,7 +106,6 @@ namespace GameStore.API.Controllers
                     return StatusCode((int)response.Status, response);
                 }
 
-                //return CreatedAtAction(nameof(GetPublisherById), new { id = response.Data?.Id }, response);
                 return Ok(response);
             }
             catch (Exception exception)
@@ -112,6 +116,7 @@ namespace GameStore.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(nameof(AccessRole.Moderator))]
         public async Task<IActionResult> UpdateKey(int id, [FromBody] KeyViewModel keyViewModel)
         {
             try

@@ -141,7 +141,6 @@ public class KeyService: IKeyService
             }
 
             key.Value = keyViewModel.Value;
-            //key.ActivationId = keyViewModel.ActivationId;
             key.GameId = keyViewModel.GameId;
             key.IsUsed = keyViewModel.IsUsed!.Value;
             await _keyRepository.UpdateAsync(key);
@@ -206,13 +205,6 @@ public class KeyService: IKeyService
     {
         try
         {
-            //foreach (var key in keys.Select(keyDto => _mapper.Map<Key>(keyDto)))
-            //{
-
-            //    key.IsUsed = true;
-            //    await _keyRepository.UpdateAsync(key);
-            //}
-
             foreach (var keyDto in keys)
             {
                 var key = await _keyRepository.GetAll().FirstOrDefaultAsync(key => key.Id == keyDto.Id);

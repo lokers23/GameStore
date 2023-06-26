@@ -44,9 +44,10 @@ public class OrderService : IOrderService
                 .ThenInclude(key => key.Game)
                 .Where(order => 
                     (!userId.HasValue || order.User.Id == userId) &&
-                    (string.IsNullOrEmpty(login) || order.User.Login.StartsWith(login))
-                    );
-                
+                    (string.IsNullOrEmpty(login) || order.User.Login.StartsWith(login)));
+
+            orders = orders.OrderByDescending(order => order.Id);
+            
             if (page.HasValue && pageSize.HasValue)
             {
                 var totalGames = await orders.CountAsync();
@@ -82,6 +83,8 @@ public class OrderService : IOrderService
                 .Include(order => order.User)
                 .Include(order => order.KeyOrders)
                     .ThenInclude(keyOrder => keyOrder.Key)
+                        .ThenInclude(key => key.Game)
+                        .ThenInclude(game => game.Activation)
                 .FirstOrDefaultAsync(x => x.Id == id);
 
             if (order == null)
@@ -150,36 +153,6 @@ public class OrderService : IOrderService
                 
             }
 
-            //var keys = new List<string?>();
-            //foreach (var gameId in orderView.GameIds)
-            //{
-
-            //    var key = await _keyRepository.GetAll()
-            //        .Include(key => key.Game)
-            //        .FirstOrDefaultAsync(key =>
-            //            key.GameId == gameId &&
-            //            key.IsUsed == false &&
-            //            !keys.Contains(key.Value));
-
-            //    if (key == null)
-            //    {
-            //        break;
-            //    }
-
-            //    var keyOrder = new KeyOrder { KeyId = key.Id, Order = order };
-            //    order.KeyOrders.Add(keyOrder);
-            //    order.Amount += key.Game.Price;
-
-            //    keys.Add(key.Value);
-            //}
-
-            //if (keys.Count != orderView.GameIds.Count)
-            //{
-            //    response.Status = HttpStatusCode.Conflict;
-            //    response.Errors = new Dictionary<string, string[]> { { "Key", new[] { "Не достаточно ключей" } } };
-            //    return response;
-            //}
-
             if (order.Amount > user.Balance)
             {
                 response.Status = HttpStatusCode.Conflict;
@@ -202,7 +175,6 @@ public class OrderService : IOrderService
         }
     }
 
-    //
     public async Task<Response<OrderDto?>> UpdateOrderAsync(int id, OrderViewModel orderView)
     {
         try

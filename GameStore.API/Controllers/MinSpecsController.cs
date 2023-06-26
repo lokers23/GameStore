@@ -5,6 +5,7 @@ using GameStore.Domain.Enums;
 using GameStore.Domain.Helpers;
 using GameStore.Domain.ViewModels.MinimumSpecification;
 using GameStore.Service.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GameStore.API.Controllers;
@@ -23,28 +24,14 @@ public class MinSpecsController : ControllerBase
         _platformService = platformService;
         _logger = logger;
     }
-
-    // [HttpGet]
-    // public async Task<IActionResult> GetMinSpecifications(string? platformName)
-    // {
-    //     try
-    //     {
-    //         var response = await _minSpecService.GetMinSpecsAsync(platformName);
-    //         return Ok(response);
-    //     }
-    //     catch (Exception exception)
-    //     {
-    //         var response = Catcher.CatchError<List<MinSpecDto>?, MinSpecsController>(exception, _logger);
-    //         return StatusCode((int)response.Status, response);
-    //     }
-    // }
     
     [HttpGet]
-    public async Task<IActionResult> GetMinSpecifications(string? platformName, [FromQuery] int? page, [FromQuery] int? pageSize)
+    public async Task<IActionResult> GetMinSpecifications(string? platformName, [FromQuery] int? page, [FromQuery] int? pageSize, [FromQuery] string? operatingSystem, 
+        [FromQuery] string? processor, [FromQuery] string? graphics)
     {
         try
         {
-            var response = await _minSpecService.GetMinSpecsAsync(platformName, page, pageSize);
+            var response = await _minSpecService.GetMinSpecsAsync(platformName, page, pageSize, operatingSystem, processor, graphics);
             return Ok(response);
         }
         catch (Exception exception)
@@ -75,6 +62,7 @@ public class MinSpecsController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(nameof(AccessRole.Moderator))]
     public async Task<IActionResult> CreateMinSpecification([FromBody] MinSpecificationViewModel minSpecView)
     {
         try
@@ -107,6 +95,7 @@ public class MinSpecsController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [Authorize(nameof(AccessRole.Moderator))]
     public async Task<IActionResult> UpdateMinSpecification(int id, [FromBody] MinSpecificationViewModel minSpecView)
     {
         try
@@ -144,6 +133,7 @@ public class MinSpecsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize(nameof(AccessRole.Moderator))]
     public async Task<IActionResult> DeleteMinSpecification(int id)
     {
         try

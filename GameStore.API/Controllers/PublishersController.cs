@@ -1,11 +1,11 @@
 ﻿using GameStore.API.Extensions;
 using GameStore.Domain.Constants;
+using GameStore.Domain.Enums;
 using GameStore.Domain.Helpers;
 using GameStore.Domain.Models;
 using GameStore.Domain.ViewModels.Publisher;
 using GameStore.Service.Interfaces;
-using GameStore.Service.Services;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GameStore.API.Controllers
@@ -58,6 +58,7 @@ namespace GameStore.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(nameof(AccessRole.Moderator))]
         public async Task<IActionResult> DeletePublisher(int id)
         {
             try
@@ -78,6 +79,7 @@ namespace GameStore.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(nameof(AccessRole.Moderator))]
         public async Task<IActionResult> CreatePublisher([FromBody] PublisherViewModel publisherView)
         {
             try
@@ -104,6 +106,7 @@ namespace GameStore.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(nameof(AccessRole.Moderator))]
         public async Task<IActionResult> UpdatePublisher(int id, [FromBody] PublisherViewModel publisherView)
         {
             try

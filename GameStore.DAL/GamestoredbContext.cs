@@ -22,7 +22,6 @@ namespace GameStore.DAL
         public virtual DbSet<Developer> Developers { get; set; }
         public virtual DbSet<Game> Games { get; set; }
         public virtual DbSet<GameGenre> GameGenres { get; set; }
-        //public virtual DbSet<GameOrder> GameOrders { get; set; }
         public virtual DbSet<KeyOrder> KeyOrders { get; set; }
         public virtual DbSet<Genre> Genres { get; set; }
         public virtual DbSet<Key> Keys { get; set; }
@@ -31,7 +30,6 @@ namespace GameStore.DAL
         public virtual DbSet<Platform> Platforms { get; set; }
         public virtual DbSet<Publisher> Publishers { get; set; }
         public virtual DbSet<User> Users { get; set; }
-        //public virtual DbSet<Role> Roles { get; set; }
         public virtual DbSet<Image> Images { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -39,8 +37,10 @@ namespace GameStore.DAL
              if (!optionsBuilder.IsConfigured)
              {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                //optionsBuilder.UseMySQL("server=localhost;user=root;password=123123123;database=gamestoredb");
-                optionsBuilder.UseSqlServer(@"Data Source=.\SQLEXPRESS;Initial Catalog=gamestoredb;Integrated Security=True;MultipleActiveResultSets=True;TrustServerCertificate=True;");
+                
+                //optionsBuilder.UseSqlServer(@"Data Source=.\SQLEXPRESS;Initial Catalog=gamestoredb;Integrated Security=True;MultipleActiveResultSets=True;TrustServerCertificate=True;");
+                optionsBuilder.UseSqlServer("Data Source=SQL6031.site4now.net;Initial Catalog=db_a99e61_lokers;User Id=db_a99e61_lokers_admin;Password=159487159487aA"
+                );
             }
         }
 
@@ -86,9 +86,7 @@ namespace GameStore.DAL
 
                 entity.HasIndex(e => e.DeveloperId, "developer_id");
 
-                entity.HasIndex(e => e.Name, "name")
-                    //.IsUnique()
-                    ;
+                entity.HasIndex(e => e.Name, "name");
 
                 entity.HasIndex(e => e.PublisherId, "publisher_id");
                 entity.HasIndex(e => e.ActivationId, "activation_id");
@@ -124,7 +122,7 @@ namespace GameStore.DAL
                     .HasColumnName("publisher_id")
                     .HasDefaultValueSql("NULL");
 
-                //////
+                
                 entity.Property(e => e.ActivationId)
                     .HasColumnType("int")
                     .HasColumnName("activation_id")
@@ -151,7 +149,7 @@ namespace GameStore.DAL
                     .OnDelete(DeleteBehavior.SetNull)
                     .HasConstraintName("FK_game_publisher_id");
 
-                ///////
+                
                 entity.HasOne(d => d.Activation)
                     .WithMany(p => p.Games)
                     .HasForeignKey(d => d.ActivationId)
@@ -211,32 +209,6 @@ namespace GameStore.DAL
                     .HasConstraintName("FK_game_min_spec_min_spec_id");
             });
 
-            //modelBuilder.Entity<GameOrder>(entity =>
-            //{
-            //    entity.HasKey(e => new { e.OrderId, e.GameId })
-            //        .HasName("Primary_Game_Order");
-
-            //    entity.ToTable("game_order");
-
-            //    entity.Property(e => e.OrderId)
-            //        .HasColumnType("int")
-            //        .HasColumnName("order_id");
-
-            //    entity.Property(e => e.GameId)
-            //        .HasColumnType("int")
-            //        .HasColumnName("game_id");
-
-            //    entity.HasOne(d => d.Order)
-            //        .WithMany(p => p.GameOrders)
-            //        .HasForeignKey(d => d.OrderId)
-            //        .HasConstraintName("FK_game_order_order_id");
-
-            //    entity.HasOne(d => d.Game)
-            //        .WithMany(p => p.GameOrders)
-            //        .HasForeignKey(d => d.GameId)
-            //        .HasConstraintName("FK_game_order_game_id");
-            //});
-
             modelBuilder.Entity<KeyOrder>(entity =>
             {
                 entity.HasKey(e => new { e.OrderId, e.KeyId })
@@ -286,19 +258,12 @@ namespace GameStore.DAL
 
                 entity.HasIndex(e => e.GameId, "game_id");
 
-                //entity.HasIndex(e => e.ActivationId, "activation_id");
-
                 entity.HasIndex(e => e.Value, "value")
                     .IsUnique();
 
                 entity.Property(e => e.Id)
                     .HasColumnType("int")
                     .HasColumnName("id");
-
-                //entity.Property(e => e.ActivationId)
-                //    .HasColumnType("int")
-                //    .HasColumnName("activation_id")
-                //    .HasDefaultValueSql("NULL");
 
                 entity.Property(e => e.GameId)
                     .HasColumnType("int")
@@ -311,12 +276,6 @@ namespace GameStore.DAL
                     .IsRequired()
                     .HasMaxLength(100)
                     .HasColumnName("value");
-
-                //entity.HasOne(d => d.Activation)
-                //    .WithMany(p => p.Keys)
-                //    .HasForeignKey(d => d.ActivationId)
-                //    .OnDelete(DeleteBehavior.SetNull)
-                //    .HasConstraintName("FK_key_activation_id");
 
                 entity.HasOne(d => d.Game)
                     .WithMany(p => p.Keys)
@@ -436,16 +395,9 @@ namespace GameStore.DAL
             {
                 entity.ToTable("user");
 
-                //entity.HasIndex(e => e.RoleId, "role_id");
-
                 entity.Property(e => e.Id)
                     .HasColumnType("int")
                     .HasColumnName("id");
-
-                // entity.Property(e => e.RoleId)
-                //     .HasColumnType("int")
-                //     .HasColumnName("role_id")
-                //     .HasDefaultValueSql("NULL");
 
                 entity.Property(e => e.Role)
                     .HasConversion<int>();
@@ -468,30 +420,7 @@ namespace GameStore.DAL
                     .IsRequired()
                     .HasMaxLength(255)
                     .HasColumnName("password");
-                
-                // entity.HasOne(d => d.Role)
-                //     .WithMany(p => p.Users)
-                //     .HasForeignKey(d => d.RoleId)
-                //     .OnDelete(DeleteBehavior.SetNull)
-                //     .HasConstraintName("FK_role_id");
             });
-
-            // modelBuilder.Entity<Role>(entity =>
-            // {
-            //     entity.ToTable("role");
-            //
-            //     entity.Property(e => e.Id)
-            //        .HasColumnType("int")
-            //        .HasColumnName("id");
-            //
-            //     entity.HasIndex(e => e.AccessRole, "access_role")
-            //         .IsUnique();
-            //
-            //     entity.Property(e => e.AccessRole)
-            //         .IsRequired()
-            //         .HasMaxLength(100)
-            //         .HasColumnName("access_role");
-            // });
             
             modelBuilder.Entity<Image>(entity =>
             {

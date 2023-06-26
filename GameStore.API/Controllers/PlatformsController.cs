@@ -10,6 +10,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GameStore.Domain.ViewModels.Platform;
+using GameStore.Domain.Enums;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GameStore.API.Controllers
 {
@@ -61,6 +63,7 @@ namespace GameStore.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(nameof(AccessRole.Moderator))]
         public async Task<IActionResult> DeletePlatform(int id)
         {
             try
@@ -81,6 +84,7 @@ namespace GameStore.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(nameof(AccessRole.Moderator))]
         public async Task<IActionResult> CreatePlatform([FromBody] PlatformViewModel publisherView)
         {
             try
@@ -107,6 +111,7 @@ namespace GameStore.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(nameof(AccessRole.Moderator))]
         public async Task<IActionResult> UpdatePlatform(int id, [FromBody] PlatformViewModel publisherView)
         {
             try

@@ -1,6 +1,7 @@
 ﻿using GameStore.API.Extensions;
 using GameStore.Domain.Constants;
 using GameStore.Domain.Dto.Game;
+using GameStore.Domain.Enums;
 using GameStore.Domain.Helpers;
 using GameStore.Domain.Models;
 using GameStore.Domain.ViewModels.Game;
@@ -74,6 +75,7 @@ public class GamesController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(nameof(AccessRole.Moderator))]
     public async Task<IActionResult> CreateGame([FromForm] GameViewModel gameViewModel, IFormFile? avatar)
     {
         try
@@ -134,6 +136,7 @@ public class GamesController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
+    [Authorize(nameof(AccessRole.Moderator))]
     public async Task<IActionResult> UpdateGame(int id, [FromForm] GameViewModel gameViewModel, IFormFile? avatar)
     {
         try
@@ -162,10 +165,6 @@ public class GamesController : ControllerBase
             var responseWithGame = await _gameService.GetGameByIdAsync(id);
             var fileNameForDelete = responseWithGame.Data.AvatarName;
 
-            // думаю эту логику нужно вынести в сервис и проверять там меняем ли мы аватарку
-            //var fileName = gameViewModel.Name + "-" + DateTime.Now.ToString("yyyy-MM-dd") + ".jpg";
-            //gameViewModel.AvatarName = fileName;
-
             var response = await _gameService.UpdateGameAsync(id, gameViewModel);
             if ((int)response.Status >= 300)
             {
@@ -175,7 +174,6 @@ public class GamesController : ControllerBase
             if (gameViewModel.isChangedAvatar)
             {
                 await DeleteAvatarImage(fileNameForDelete);
-                //await SaveAvatarImage(fileName, avatar);
                 await SaveAvatarImage(response.Data.AvatarName, avatar);
             }
             
@@ -190,6 +188,7 @@ public class GamesController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
+    [Authorize(nameof(AccessRole.Moderator))]
     public async Task<IActionResult> DeleteGame(int id)
     {
         try

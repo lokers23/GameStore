@@ -7,7 +7,8 @@ namespace GameStore.Service.Interfaces;
 
 public interface IMinSpecificationService
 {
-    Task<Response<List<MinSpecDto>?>> GetMinSpecsAsync(string? platform, int? page, int? pageSize);
+    Task<Response<List<MinSpecDto>?>> GetMinSpecsAsync(string? platform, int? page, int? pageSize,
+        string? operatingSystem, string? processor, string? graphics);
     Task<Response<MinSpecDto?>> GetMinSpecByIdAsync(int id);
     Task<Response<MinSpecDto?>> CreateMinSpecAsync(MinSpecificationViewModel minSpecView);
     Task<Response<MinSpecDto?>> UpdateMinSpecAsync(int id, MinSpecificationViewModel minSpecView);

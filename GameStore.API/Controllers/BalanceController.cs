@@ -1,6 +1,8 @@
 ﻿using System.Security.Claims;
+using GameStore.Domain.Enums;
 using GameStore.Domain.Helpers;
 using GameStore.Service.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GameStore.API.Controllers;
@@ -18,6 +20,7 @@ public class BalanceController: ControllerBase
     }
 
     [HttpPost("top-up")]
+    [Authorize]
     public async Task<IActionResult> TopUpBalance(decimal amount)
     {
         try
@@ -42,6 +45,7 @@ public class BalanceController: ControllerBase
     }
     
     [HttpPost("deduct")]
+    [Authorize]
     public async Task<IActionResult> DeductFromBalance(decimal amount)
     {
         try

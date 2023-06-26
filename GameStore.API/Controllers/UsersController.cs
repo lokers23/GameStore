@@ -25,11 +25,12 @@ public class UsersController: ControllerBase
     }
     
     [HttpGet]
-    public async Task<IActionResult> GetUsers()
+    [Authorize(nameof(AccessRole.Moderator))]
+    public async Task<IActionResult> GetUsers([FromQuery] int? page,[FromQuery] int? pageSize,[FromQuery] string? login)
     {
         try
         {
-            var response = await _userService.GetUsersAsync();
+            var response = await _userService.GetUsersAsync(page, pageSize, login);
             return Ok(response);
         }
         catch (Exception exception)
@@ -39,12 +40,35 @@ public class UsersController: ControllerBase
         }
     }
 
-    [HttpDelete("id")]
+    [HttpGet("{id}")]
+    [Authorize(nameof(AccessRole.Moderator))]
+    public async Task<IActionResult> GetUserById(int id)
+    {
+        try
+        {
+            var response = await _userService.GetUserByIdAsync(id);
+            
+            return Ok(response);
+        }
+        catch (Exception exception)
+        {
+            var response = Catcher.CatchError<List<User>?, UsersController>(exception, _logger);
+            return StatusCode((int)response.Status, response);
+        }
+    }
+    
+    [HttpDelete("{id}")]
+    [Authorize(nameof(AccessRole.Administrator))]
     public async Task<IActionResult> DeleteUser(int id)
     {
         try
         {
             var response = await _userService.DeleteUserAsync(id);
+            if (response.Data = false)
+            {
+                return StatusCode((int)response.Status, response);
+            }
+            
             return Ok(response);
         }
         catch (Exception exception)
@@ -55,6 +79,7 @@ public class UsersController: ControllerBase
     }
     
     [HttpGet("profile")]
+    [Authorize]
     public async Task<IActionResult> GetUserData()
     {
         try
@@ -63,6 +88,8 @@ public class UsersController: ControllerBase
             var success = int.TryParse(claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId);
             
             var response = await _userService.GetUserByIdAsync(userId);
+            response.Data.Password = null;
+            
             return StatusCode((int)response.Status, response);
         }
         catch (Exception exception)
@@ -73,6 +100,7 @@ public class UsersController: ControllerBase
     }
 
     [HttpPut("role")]
+    [Authorize(nameof(AccessRole.Administrator))]
     public async Task<IActionResult> ChangeRole(ChangeRoleViewModel viewModel)
     {
         try
@@ -122,7 +150,6 @@ public class UsersController: ControllerBase
             {
                 return StatusCode((int)user.Status, user);
             }
-            
             
             var hashPassword = AccountHelper.HashPassword(viewModel.NewPassword, user.Data.Login);
             

@@ -1,9 +1,11 @@
 ﻿using GameStore.API.Extensions;
 using GameStore.Domain.Constants;
+using GameStore.Domain.Enums;
 using GameStore.Domain.Helpers;
 using GameStore.Domain.Models;
 using GameStore.Domain.ViewModels.Genre;
 using GameStore.Service.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GameStore.API.Controllers;
@@ -56,6 +58,7 @@ public class GenresController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize(nameof(AccessRole.Moderator))]
     public async Task<IActionResult> DeleteGenre(int id)
     {
         try
@@ -76,6 +79,7 @@ public class GenresController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(nameof(AccessRole.Moderator))]
     public async Task<IActionResult> CreateGenre([FromBody] GenreViewModel genreViewModel)
     {
         try
@@ -102,6 +106,7 @@ public class GenresController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [Authorize(nameof(AccessRole.Moderator))]
     public async Task<IActionResult> UpdateGenre(int id, [FromBody] GenreViewModel genreViewModel)
     {
         try

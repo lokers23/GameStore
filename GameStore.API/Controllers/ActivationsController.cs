@@ -1,9 +1,11 @@
 ﻿using GameStore.API.Extensions;
 using GameStore.Domain.Constants;
 using GameStore.Domain.Dto.Activation;
+using GameStore.Domain.Enums;
 using GameStore.Domain.Helpers;
 using GameStore.Domain.ViewModels.Activation;
 using GameStore.Service.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GameStore.API.Controllers
@@ -56,6 +58,7 @@ namespace GameStore.API.Controllers
         }
 
         [HttpDelete("{id:int}")]
+        [Authorize(nameof(AccessRole.Moderator))]
         public async Task<IActionResult> DeleteActivation(int id)
         {
             try
@@ -76,6 +79,7 @@ namespace GameStore.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(nameof(AccessRole.Moderator))]
         public async Task<IActionResult> CreateActivation([FromBody] ActivationViewModel activationView)
         {
             try
@@ -102,6 +106,7 @@ namespace GameStore.API.Controllers
         }
 
         [HttpPut("{id:int}")]
+        [Authorize(nameof(AccessRole.Moderator))]
         public async Task<IActionResult> UpdateActivation(int id, [FromBody] ActivationViewModel activationView)
         {
             try
